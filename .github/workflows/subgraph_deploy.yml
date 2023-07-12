@@ -20,7 +20,7 @@ jobs:
       - uses: actions/setup-node@v3
         with:
           node-version: 16
-          
+
       - uses: pnpm/action-setup@v2
         name: Install pnpm
         id: pnpm-install
@@ -45,10 +45,10 @@ jobs:
         run: pnpm install
 
       - name: Codegen
-        run: npx codegen
+        run: npx graph codegen
 
       - name: Build
-        run: npx build
+        run: npx run build
 
       - name: Create Subgraph
         run: npx graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/
