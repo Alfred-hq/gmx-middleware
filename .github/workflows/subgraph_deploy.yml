@@ -45,13 +45,13 @@ jobs:
         run: pnpm install
 
       - name: Codegen
-        run: npx graph codegen
+        run: npx run codegen
 
       - name: Build
         run: npx run build
 
       - name: Create Subgraph
-        run: npx graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/
+        run: npx graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/ subgraph.arbitrum.yaml
 
       - name: Deploy Subgraph
-        run: npx graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/
+        run: npx graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/ subgraph.arbitrum.yaml
