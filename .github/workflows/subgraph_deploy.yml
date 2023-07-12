@@ -1,0 +1,58 @@
+on:
+  push:
+    branches:
+      - master
+      - beta
+
+jobs:
+  alfred-gmx-subgraph:
+    name: alfred-gmx-subgraph
+    runs-on: ubuntu-latest
+    environment: production
+    defaults:
+      run:
+        working-directory: ./subgraph
+    steps:
+      - name: Get branch name
+        id: branch-name
+        uses: tj-actions/branch-names@v6
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 19
+          cache: 'yarn'
+      - uses: pnpm/action-setup@v2
+        name: Install pnpm
+        id: pnpm-install
+        with:
+          version: 7
+          run_install: false
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+  
+      - uses: actions/cache@v3
+        name: Setup pnpm cache
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Codegen
+        run: npx codegen
+
+      - name: Build
+        run: npx build
+
+      - name: Create Subgraph
+        run: npx graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/
+
+      - name: Deploy Subgraph
+        run: npx graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }}  --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }}  --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}  --ipfs https://api.thegraph.com/ipfs/
