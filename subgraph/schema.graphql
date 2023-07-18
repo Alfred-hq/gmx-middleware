@@ -278,7 +278,7 @@ type PositionSettled @entity(immutable: true) {
   logIndex: BigInt!
 }
 
-type PositionLink @entity(immutable: true) {
+type PositionLink @entity(immutable: false) {
   id: String!
 
   account: String!
