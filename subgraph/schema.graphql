@@ -1,11 +1,11 @@
 
 
 type ClosePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes!
+  id: String!
+  account: String!
   link: PositionLink!
 
-  key: Bytes! # bytes32
+  key: String! # String32
   size: BigInt! # uint256
   collateral: BigInt! # uint256
   averagePrice: BigInt! # uint256
@@ -15,19 +15,19 @@ type ClosePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type DecreasePosition @entity(immutable: true) {
-  id: Bytes!
-  key: Bytes! # bytes32
+  id: String!
+  key: String! # String32
   link: PositionLink!
 
-  account: Bytes! # address
-  collateralToken: Bytes! # address
-  indexToken: Bytes! # address
+  account: String! # address
+  collateralToken: String! # address
+  indexToken: String! # address
   collateralDelta: BigInt! # uint256
   sizeDelta: BigInt! # uint256
   isLong: Boolean! # bool
@@ -36,19 +36,19 @@ type DecreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type IncreasePosition @entity(immutable: true) {
-  id: Bytes!
-  key: Bytes! # bytes32
+  id: String!
+  key: String! # String32
   link: PositionLink!
 
-  account: Bytes! # address
-  collateralToken: Bytes! # address
-  indexToken: Bytes! # address
+  account: String! # address
+  collateralToken: String! # address
+  indexToken: String! # address
   collateralDelta: BigInt! # uint256
   sizeDelta: BigInt! # uint256
   isLong: Boolean! # bool
@@ -57,17 +57,17 @@ type IncreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type UpdatePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes!
+  id: String!
+  account: String!
   link: PositionLink!
 
-  key: Bytes! # bytes32
+  key: String! # String32
   size: BigInt! # uint256
   collateral: BigInt! # uint256
   averagePrice: BigInt! # uint256
@@ -78,19 +78,19 @@ type UpdatePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type LiquidatePosition @entity(immutable: true) {
-  id: Bytes!
-  key: Bytes! # bytes32
+  id: String!
+  key: String! # String32
   link: PositionLink!
 
-  account: Bytes! # address
-  collateralToken: Bytes! # address
-  indexToken: Bytes! # address
+  account: String! # address
+  collateralToken: String! # address
+  indexToken: String! # address
   isLong: Boolean! # bool
   size: BigInt! # uint256
   collateral: BigInt! # uint256
@@ -100,16 +100,16 @@ type LiquidatePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type Swap @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
-  tokenIn: Bytes! # address
-  tokenOut: Bytes! # address
+  id: String!
+  account: String! # address
+  tokenIn: String! # address
+  tokenOut: String! # address
   amountIn: BigInt! # uint256
   amountOut: BigInt! # uint256
   amountOutAfterFees: BigInt! # uint256
@@ -117,21 +117,21 @@ type Swap @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type ExecuteDecreasePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
+  id: String!
+  account: String! # address
 
-  path: [Bytes!]! # address[]
-  indexToken: Bytes! # address
+  path: [String!]! # address[]
+  indexToken: String! # address
   collateralDelta: BigInt! # uint256
   sizeDelta: BigInt! # uint256
   isLong: Boolean! # bool
-  receiver: Bytes! # address
+  receiver: String! # address
   acceptablePrice: BigInt! # uint256
   minOut: BigInt! # uint256
   executionFee: BigInt! # uint256
@@ -140,17 +140,17 @@ type ExecuteDecreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type ExecuteIncreasePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
+  id: String!
+  account: String! # address
   
-  path: [Bytes!]! # address[]
-  indexToken: Bytes! # address
+  path: [String!]! # address[]
+  indexToken: String! # address
   amountIn: BigInt! # uint256
   minOut: BigInt! # uint256
   sizeDelta: BigInt! # uint256
@@ -162,21 +162,21 @@ type ExecuteIncreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type CreateDecreasePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
+  id: String!
+  account: String! # address
 
-  path: [Bytes!]! # address[]
-  indexToken: Bytes! # address
+  path: [String!]! # address[]
+  indexToken: String! # address
   collateralDelta: BigInt! # uint256
   sizeDelta: BigInt! # uint256
   isLong: Boolean! # bool
-  receiver: Bytes! # address
+  receiver: String! # address
   acceptablePrice: BigInt! # uint256
   minOut: BigInt! # uint256
   executionFee: BigInt! # uint256
@@ -186,17 +186,17 @@ type CreateDecreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type CreateIncreasePosition @entity(immutable: true) {
-  id: Bytes!
-  account: Bytes! # address
+  id: String!
+  account: String! # address
 
-  path: [Bytes!]! # address[]
-  indexToken: Bytes! # address
+  path: [String!]! # address[]
+  indexToken: String! # address
   amountIn: BigInt! # uint256
   minOut: BigInt! # uint256
   sizeDelta: BigInt! # uint256
@@ -210,7 +210,7 @@ type CreateIncreasePosition @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
@@ -218,15 +218,15 @@ type CreateIncreasePosition @entity(immutable: true) {
 
 # slots
 type PositionSlot @entity {
-  id: Bytes!
+  id: String!
   idCount: Int!
   link: PositionLink!
 
-  account: Bytes!
-  collateralToken: Bytes!
-  indexToken: Bytes!
+  account: String!
+  collateralToken: String!
+  indexToken: String!
   isLong: Boolean!
-  key: Bytes!
+  key: String!
 
   size: BigInt!
   collateral: BigInt!
@@ -244,15 +244,15 @@ type PositionSlot @entity {
 }
 
 type PositionSettled @entity(immutable: true) {
-  id: Bytes!
+  id: String!
   idCount: Int!
   link: PositionLink!
 
-  account: Bytes!
-  collateralToken: Bytes!
-  indexToken: Bytes!
+  account: String!
+  collateralToken: String!
+  indexToken: String!
   isLong: Boolean!
-  key: Bytes!
+  key: String!
 
   size: BigInt!
   collateral: BigInt!
@@ -273,19 +273,19 @@ type PositionSettled @entity(immutable: true) {
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
 }
 
 type PositionLink @entity(immutable: true) {
-  id: Bytes!
+  id: String!
 
-  account: Bytes!
-  collateralToken: Bytes!
-  indexToken: Bytes!
+  account: String!
+  collateralToken: String!
+  indexToken: String!
   isLong: Boolean!
-  key: Bytes!
+  key: String!
 
   # executeIncreaseList: [ExecuteIncreasePosition!] @derivedFrom(field: "link")
   # executeDecreaseList: [ExecuteDecreasePosition!] @derivedFrom(field: "link")
@@ -293,10 +293,266 @@ type PositionLink @entity(immutable: true) {
   increaseList: [IncreasePosition!] @derivedFrom(field: "link")
   decreaseList: [DecreasePosition!] @derivedFrom(field: "link")
   updateList: [UpdatePosition!] @derivedFrom(field: "link")
+  closeList: [ClosePosition!] @derivedFrom(field: "link")
 
   blockNumber: BigInt!
   blockTimestamp: BigInt!
-  transactionHash: Bytes!
+  transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
+  averagePrice: BigInt!
+  entryFundingRate: BigInt!
+  reserveAmount: BigInt!
+  realisedPnl: BigInt!
+
+  cumulativeSize: BigInt!
+  cumulativeCollateral: BigInt!
+  cumulativeFee: BigInt!
+
+  maxSize: BigInt!
+  maxCollateral: BigInt!
+
+  settlePrice: BigInt!
+  isLiquidated: Boolean!
+  size: BigInt!
+  collateral: BigInt!
+}
+type CancelDecreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  collateralToken: String! # address
+  collateralDelta: BigInt! # uint256
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type CancelIncreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  purchaseToken: String! # address
+  purchaseTokenAmount: BigInt! # uint256
+  collateralToken: String! # address
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type CancelSwapOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  path: [String!]! # address[]
+  amountIn: BigInt! # uint256
+  minOut: BigInt! # uint256
+  triggerRatio: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  shouldUnwrap: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type CreateDecreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  collateralToken: String! # address
+  collateralDelta: BigInt! # uint256
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type CreateIncreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  purchaseToken: String! # address
+  purchaseTokenAmount: BigInt! # uint256
+  collateralToken: String! # address
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type CreateSwapOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  path: [String!]! # address[]
+  amountIn: BigInt! # uint256
+  minOut: BigInt! # uint256
+  triggerRatio: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  shouldUnwrap: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type ExecuteDecreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  collateralToken: String! # address
+  collateralDelta: BigInt! # uint256
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  executionPrice: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type ExecuteIncreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  purchaseToken: String! # address
+  purchaseTokenAmount: BigInt! # uint256
+  collateralToken: String! # address
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  executionFee: BigInt! # uint256
+  executionPrice: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type ExecuteSwapOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  path: [String!]! # address[]
+  amountIn: BigInt! # uint256
+  minOut: BigInt! # uint256
+  amountOut: BigInt! # uint256
+  triggerRatio: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  shouldUnwrap: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type Initialize @entity(immutable: true) {
+  id: String!
+  router: String! # address
+  vault: String! # address
+  weth: String! # address
+  usdg: String! # address
+  minExecutionFee: BigInt! # uint256
+  minPurchaseTokenAmountUsd: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateDecreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  collateralToken: String! # address
+  collateralDelta: BigInt! # uint256
+  indexToken: String! # address
+  sizeDelta: BigInt! # uint256
+  isLong: Boolean! # bool
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateGov @entity(immutable: true) {
+  id: String!
+  gov: String! # address
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateIncreaseOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  orderIndex: BigInt! # uint256
+  collateralToken: String! # address
+  indexToken: String! # address
+  isLong: Boolean! # bool
+  sizeDelta: BigInt! # uint256
+  triggerPrice: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateMinExecutionFee @entity(immutable: true) {
+  id: String!
+  minExecutionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateMinPurchaseTokenAmountUsd @entity(immutable: true) {
+  id: String!
+  minPurchaseTokenAmountUsd: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
+}
+
+type UpdateSwapOrder @entity(immutable: true) {
+  id: String!
+  account: String! # address
+  ordexIndex: BigInt! # uint256
+  path: [String!]! # address[]
+  amountIn: BigInt! # uint256
+  minOut: BigInt! # uint256
+  triggerRatio: BigInt! # uint256
+  triggerAboveThreshold: Boolean! # bool
+  shouldUnwrap: Boolean! # bool
+  executionFee: BigInt! # uint256
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  transactionHash: String!
 }

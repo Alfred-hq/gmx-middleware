@@ -18,15 +18,15 @@ export function handleCreateDecreasePosition(
   event: CreateDecreasePositionEvent
 ): void {
   const entity = new CreateDecreasePosition(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   )
-  entity.account = event.params.account
-  entity.path = event.params.path.map<Bytes>((e: Bytes) => e)
-  entity.indexToken = event.params.indexToken
+  entity.account = event.params.account.toHexString()
+  entity.path = event.params.path.map<string>((e: Bytes) => e.toHexString())
+  entity.indexToken = event.params.indexToken.toHexString()
   entity.collateralDelta = event.params.collateralDelta
   entity.sizeDelta = event.params.sizeDelta
   entity.isLong = event.params.isLong
-  entity.receiver = event.params.receiver
+  entity.receiver = event.params.receiver.toHexString()
   entity.acceptablePrice = event.params.acceptablePrice
   entity.minOut = event.params.minOut
   entity.executionFee = event.params.executionFee
@@ -37,7 +37,7 @@ export function handleCreateDecreasePosition(
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.transactionHash = event.transaction.hash.toHexString()
   entity.transactionIndex = event.transaction.index
   entity.logIndex = event.logIndex
 
@@ -48,11 +48,11 @@ export function handleCreateIncreasePosition(
   event: CreateIncreasePositionEvent
 ): void {
   const entity = new CreateIncreasePosition(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   )
-  entity.account = event.params.account
-  entity.path = event.params.path.map<Bytes>((e: Bytes) => e)
-  entity.indexToken = event.params.indexToken
+  entity.account = event.params.account.toHexString()
+  entity.path = event.params.path.map<string>((e: Bytes) => e.toHexString())
+  entity.indexToken = event.params.indexToken.toHexString()
   entity.amountIn = event.params.amountIn
   entity.minOut = event.params.minOut
   entity.sizeDelta = event.params.sizeDelta
@@ -67,7 +67,7 @@ export function handleCreateIncreasePosition(
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.transactionHash = event.transaction.hash.toHexString()
   entity.transactionIndex = event.transaction.index
   entity.logIndex = event.logIndex
 
@@ -79,15 +79,15 @@ export function handleExecuteDecreasePosition(
   event: ExecuteDecreasePositionEvent
 ): void {
   const entity = new ExecuteDecreasePosition(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   )
-  entity.account = event.params.account
-  entity.path = event.params.path.map<Bytes>((e: Bytes) => e)
-  entity.indexToken = event.params.indexToken
+  entity.account = event.params.account.toHexString()
+  entity.path = event.params.path.map<string>((e: Bytes) => e.toHexString())
+  entity.indexToken = event.params.indexToken.toHexString()
   entity.collateralDelta = event.params.collateralDelta
   entity.sizeDelta = event.params.sizeDelta
   entity.isLong = event.params.isLong
-  entity.receiver = event.params.receiver
+  entity.receiver = event.params.receiver.toHexString()
   entity.acceptablePrice = event.params.acceptablePrice
   entity.minOut = event.params.minOut
   entity.executionFee = event.params.executionFee
@@ -96,7 +96,7 @@ export function handleExecuteDecreasePosition(
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.transactionHash = event.transaction.hash.toHexString()
   entity.transactionIndex = event.transaction.index
   entity.logIndex = event.logIndex
 
@@ -107,11 +107,11 @@ export function handleExecuteIncreasePosition(
   event: ExecuteIncreasePositionEvent
 ): void {
   const entity = new ExecuteIncreasePosition(
-    event.transaction.hash.concatI32(event.logIndex.toI32())
+    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   )
-  entity.account = event.params.account
-  entity.path = event.params.path.map<Bytes>((e: Bytes) => e)
-  entity.indexToken = event.params.indexToken
+  entity.account = event.params.account.toHexString()
+  entity.path = event.params.path.map<string>((e: Bytes) => e.toHexString())
+  entity.indexToken = event.params.indexToken.toHexString()
   entity.amountIn = event.params.amountIn
   entity.minOut = event.params.minOut
   entity.sizeDelta = event.params.sizeDelta
@@ -123,7 +123,7 @@ export function handleExecuteIncreasePosition(
 
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
-  entity.transactionHash = event.transaction.hash
+  entity.transactionHash = event.transaction.hash.toHexString()
   entity.transactionIndex = event.transaction.index
   entity.logIndex = event.logIndex
 
