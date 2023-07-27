@@ -1,4 +1,4 @@
-import { Address, Bytes } from "@graphprotocol/graph-ts"
+import { Address, BigInt, Bytes } from "@graphprotocol/graph-ts"
 import {
   ClosePosition as ClosePositionEvent,
   DecreasePosition as DecreasePositionEvent,
@@ -189,7 +189,11 @@ export function handleUpdatePosition(event: UpdatePositionEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   )
 
-
+  let price=ZERO_BI;
+  if(event.block.number.gt(BigInt.fromString('30020987'))){
+    let priceCallResult=vaultPricefeed.VaultPricefeed.bind(vaultPricefeedAddress).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false)
+    price=priceCallResult.reverted ? ZERO_BI : priceCallResult.value
+  } 
   entity.link = getPositionLinkId(positionSlot.idCount, event.params.key).toHexString()
   entity.account = positionSlot.account
   entity.key = event.params.key.toHexString()
@@ -199,8 +203,7 @@ export function handleUpdatePosition(event: UpdatePositionEvent): void {
   entity.entryFundingRate = event.params.entryFundingRate
   entity.reserveAmount = event.params.reserveAmount
   entity.realisedPnl = event.params.realisedPnl
-  const markPrice = vaultPricefeed.VaultPricefeed.bind(vaultPricefeedAddress).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false)
-  entity.markPrice = markPrice.reverted ? ZERO_BI : markPrice.value
+  entity.markPrice = price
   entity.blockNumber = event.block.number
   entity.blockTimestamp = event.block.timestamp
   entity.transactionHash = event.transaction.hash.toHexString()
@@ -331,7 +334,11 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   const positionSettled = new PositionSettled(
     Bytes.fromUTF8('PositionSettled').concat(event.transaction.hash.concatI32(event.logIndex.toI32())).toHexString()
   )
-  const price=vaultPricefeed.VaultPricefeed.bind(vaultPricefeedAddress).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false)
+  let price=ZERO_BI;
+  if(event.block.number.gt(BigInt.fromString('30020987'))){
+    let priceCallResult=vaultPricefeed.VaultPricefeed.bind(vaultPricefeedAddress).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false)
+    price=priceCallResult.reverted ? ZERO_BI : priceCallResult.value
+  }
   const positionLink = PositionLink.load(positionSlot.link)
   if (positionLink != null) {
     positionLink.cumulativeCollateral=positionSlot.cumulativeCollateral
@@ -340,7 +347,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
     positionLink.cumulativeSize=positionSlot.cumulativeSize
     positionLink.maxSize=positionSlot.maxSize
     positionLink.averagePrice=positionSlot.averagePrice
-    positionLink.settlePrice=price.reverted ? ZERO_BI : price.value
+    positionLink.settlePrice=price
     positionLink.realisedPnl=positionSlot.realisedPnl
     positionLink.entryFundingRate=positionSlot.entryFundingRate
     positionLink.reserveAmount=positionSlot.reserveAmount
@@ -372,7 +379,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.maxCollateral = positionSlot.maxCollateral
   positionSettled.maxSize = positionSlot.maxSize
 
-  positionSettled.settlePrice = price.reverted ? ZERO_BI : price.value
+  positionSettled.settlePrice = price
   positionSettled.isLiquidated = false
 
   positionSettled.blockNumber = event.block.number
