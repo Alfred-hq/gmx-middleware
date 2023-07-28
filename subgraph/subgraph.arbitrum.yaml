@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868"
       abi: PositionRouter
-      startBlock: 29856750
+      startBlock: 82044446
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -43,7 +43,7 @@ dataSources:
     source:
       address: "0x489ee077994b6658eafa855c308275ead8097c4a"
       abi: Vault
-      startBlock: 227000
+      startBlock: 82044446
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -81,7 +81,7 @@ dataSources:
     source:
       address: "0x09f77E8A13De9a35a7231028187e9fD5DB8a2ACB"
       abi: OrderBookContract
-      startBlock: 2329450 
+      startBlock: 82044446 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
