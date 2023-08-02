@@ -9,7 +9,7 @@ dataSources:
     source:
       address: "0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868"
       abi: PositionRouter
-      startBlock: 90000000
+      startBlock: 103754215
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -43,7 +43,7 @@ dataSources:
     source:
       address: "0x489ee077994b6658eafa855c308275ead8097c4a"
       abi: Vault
-      startBlock: 90000000
+      startBlock: 103754215
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
