@@ -4,6 +4,7 @@ on:
       - production
       - beta
       - rc1
+      - rc2
 
 jobs:
   alfred-gmx-subgraph:
