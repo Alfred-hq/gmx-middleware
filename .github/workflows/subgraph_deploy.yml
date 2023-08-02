@@ -3,6 +3,7 @@ on:
     branches:
       - production
       - beta
+      - rc2
 
 jobs:
   alfred-gmx-subgraph:
