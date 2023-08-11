@@ -3,6 +3,7 @@ on:
     branches:
       - production
       - beta
+      - rc1
 
 jobs:
   alfred-gmx-subgraph:
@@ -51,7 +52,7 @@ jobs:
         run: pnpm run build
 
       - name: Create Subgraph
-        run: pnpm graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }} --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}
+        run: pnpm graph create alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }} --node https://arbitrum-one-the-graph-admin.b45dfbcabbbb2eb74b7f4ed26f238cf6.tk
 
       - name: Deploy Subgraph
-        run: pnpm graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }} subgraph.arbitrum.yaml --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }} --version-label v1.0.1-${{ steps.branch-name.outputs.current_branch }} --ipfs https://api.thegraph.com/ipfs/ 
+        run: pnpm graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }} subgraph.arbitrum.yaml --node https://arbitrum-one-the-graph-admin.b45dfbcabbbb2eb74b7f4ed26f238cf6.tk  --ipfs https://api.thegraph.com/ipfs/ 
