@@ -5,6 +5,7 @@ on:
       - beta
       - rc1
       - rc2
+      - rc1
 
 jobs:
   alfred-gmx-subgraph:
@@ -57,3 +58,4 @@ jobs:
 
       - name: Deploy Subgraph
         run: pnpm graph deploy alfred-gmx-arbitrum-${{ steps.branch-name.outputs.current_branch }} subgraph.arbitrum.yaml --version-label v0.0.1-${{ steps.branch-name.outputs.current_branch }} --node https://arbitrum-one-the-graph-admin.b45dfbcabbbb2eb74b7f4ed26f238cf6.tk  --ipfs https://api.thegraph.com/ipfs/ 
+
