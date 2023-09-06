@@ -241,7 +241,13 @@ type PositionSlot @entity {
 
   maxSize: BigInt!
   maxCollateral: BigInt!
-}
+  blockNumber: BigInt!
+  blockTimestamp: BigInt!
+  lastIncreasedTimestamp: BigInt!
+  lastDecreasedTimestamp: BigInt!
+  numberOfIncrease:BigInt!
+  numberOfDecrease: BigInt!
+  }
 
 type PositionSettled @entity(immutable: true) {
   id: String!

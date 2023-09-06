@@ -47,6 +47,10 @@ export function handleIncreasePosition(event: IncreasePositionEvent): void {
   }
 
   const countId = positionSlot.size.equals(ZERO_BI) ? positionSlot.idCount + 1 : positionSlot.idCount
+  positionSlot.blockTimestamp=positionSlot.size.equals(ZERO_BI) ? event.block.timestamp: positionSlot.blockTimestamp
+  positionSlot.blockNumber=positionSlot.size.equals(ZERO_BI) ? event.block.number :positionSlot.blockNumber
+  positionSlot.numberOfIncrease=positionSlot.numberOfIncrease.plus(BigInt.fromString('1'))
+  positionSlot.lastIncreasedTimestamp=event.block.timestamp;
   const PositionLinkId = getPositionLinkId(countId, event.params.key)
 
   positionSlot.link = PositionLinkId.toHexString()
@@ -125,6 +129,8 @@ export function handleDecreasePosition(event: DecreasePositionEvent): void {
   }
 
   positionSlot.cumulativeFee = positionSlot.cumulativeFee.plus(event.params.fee)
+  positionSlot.numberOfDecrease=positionSlot.numberOfDecrease.plus(BigInt.fromString('1'))
+  positionSlot.lastDecreasedTimestamp=event.block.timestamp;
   const positionLink = PositionLink.load(positionSlot.link)
   if (positionLink != null) {
     positionLink.cumulativeFee=positionSlot.cumulativeFee
@@ -434,7 +440,12 @@ function _resetPositionSlot(positionSlot: PositionSlot): PositionSlot {
 
   positionSlot.maxCollateral = ZERO_BI
   positionSlot.maxSize = ZERO_BI
-
+  positionSlot.blockNumber = ZERO_BI
+  positionSlot.blockTimestamp = ZERO_BI
+  positionSlot.numberOfIncrease=ZERO_BI
+  positionSlot.numberOfDecrease=ZERO_BI
+  positionSlot.lastIncreasedTimestamp=ZERO_BI
+  positionSlot.lastDecreasedTimestamp=ZERO_BI
   return positionSlot
 }
 
