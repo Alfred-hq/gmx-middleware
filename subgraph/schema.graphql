@@ -247,6 +247,7 @@ type PositionSlot @entity {
   lastDecreasedTimestamp: BigInt!
   numberOfIncrease:BigInt!
   numberOfDecrease: BigInt!
+  lastDecreasedPrice: BigInt!
   }
 
 type PositionSettled @entity(immutable: true) {

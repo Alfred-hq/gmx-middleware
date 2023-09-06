@@ -131,6 +131,7 @@ export function handleDecreasePosition(event: DecreasePositionEvent): void {
   positionSlot.cumulativeFee = positionSlot.cumulativeFee.plus(event.params.fee)
   positionSlot.numberOfDecrease=positionSlot.numberOfDecrease.plus(BigInt.fromString('1'))
   positionSlot.lastDecreasedTimestamp=event.block.timestamp;
+  positionSlot.lastDecreasedPrice=event.params.price;
   const positionLink = PositionLink.load(positionSlot.link)
   if (positionLink != null) {
     positionLink.cumulativeFee=positionSlot.cumulativeFee
@@ -385,7 +386,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.maxCollateral = positionSlot.maxCollateral
   positionSettled.maxSize = positionSlot.maxSize
 
-  positionSettled.settlePrice = price
+  positionSettled.settlePrice = positionSlot.lastDecreasedPrice
   positionSettled.isLiquidated = false
 
   positionSettled.blockNumber = event.block.number
