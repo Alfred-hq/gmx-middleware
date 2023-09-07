@@ -278,6 +278,11 @@ export function handleLiquidatePosition(event: LiquidatePositionEvent): void {
   positionSettled.transactionHash = event.transaction.hash.toHexString()
   positionSettled.transactionIndex = event.transaction.index
   positionSettled.logIndex = event.logIndex
+  positionSettled.openTime=positionSlot.blockTimestamp
+  positionSettled.closeTime=event.block.timestamp
+  positionSettled.numberOfIncrease=positionSlot.numberOfIncrease
+  positionSettled.numberOfDecrease=positionSlot.numberOfDecrease
+
 
   _resetPositionSlot(positionSlot)
   positionSlot.save()
@@ -394,6 +399,10 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.transactionHash = event.transaction.hash.toHexString()
   positionSettled.transactionIndex = event.transaction.index
   positionSettled.logIndex = event.logIndex
+  positionSettled.openTime=positionSlot.blockTimestamp
+  positionSettled.closeTime=event.block.timestamp
+  positionSettled.numberOfIncrease=positionSlot.numberOfIncrease
+  positionSettled.numberOfDecrease=positionSlot.numberOfDecrease
 
   _resetPositionSlot(positionSlot)
   positionSlot.save()

@@ -283,6 +283,10 @@ type PositionSettled @entity(immutable: true) {
   transactionHash: String!
   transactionIndex: BigInt!
   logIndex: BigInt!
+  openTime: BigInt!
+  closeTime: BigInt!
+  numberOfIncrease:BigInt!
+  numberOfDecrease: BigInt!
 }
 
 type PositionLink @entity(immutable: false) {
