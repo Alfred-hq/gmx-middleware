@@ -47,6 +47,10 @@ export function handleIncreasePosition(event: IncreasePositionEvent): void {
   }
 
   const countId = positionSlot.size.equals(ZERO_BI) ? positionSlot.idCount + 1 : positionSlot.idCount
+  positionSlot.blockTimestamp=positionSlot.size.equals(ZERO_BI) ? event.block.timestamp: positionSlot.blockTimestamp
+  positionSlot.blockNumber=positionSlot.size.equals(ZERO_BI) ? event.block.number :positionSlot.blockNumber
+  positionSlot.numberOfIncrease=positionSlot.numberOfIncrease.plus(BigInt.fromString('1'))
+  positionSlot.lastIncreasedTimestamp=event.block.timestamp;
   const PositionLinkId = getPositionLinkId(countId, event.params.key)
 
   positionSlot.link = PositionLinkId.toHexString()
@@ -125,6 +129,9 @@ export function handleDecreasePosition(event: DecreasePositionEvent): void {
   }
 
   positionSlot.cumulativeFee = positionSlot.cumulativeFee.plus(event.params.fee)
+  positionSlot.numberOfDecrease=positionSlot.numberOfDecrease.plus(BigInt.fromString('1'))
+  positionSlot.lastDecreasedTimestamp=event.block.timestamp;
+  positionSlot.lastDecreasedPrice=event.params.price;
   const positionLink = PositionLink.load(positionSlot.link)
   if (positionLink != null) {
     positionLink.cumulativeFee=positionSlot.cumulativeFee
@@ -271,6 +278,11 @@ export function handleLiquidatePosition(event: LiquidatePositionEvent): void {
   positionSettled.transactionHash = event.transaction.hash.toHexString()
   positionSettled.transactionIndex = event.transaction.index
   positionSettled.logIndex = event.logIndex
+  positionSettled.openTime=positionSlot.blockTimestamp
+  positionSettled.closeTime=event.block.timestamp
+  positionSettled.numberOfIncrease=positionSlot.numberOfIncrease
+  positionSettled.numberOfDecrease=positionSlot.numberOfDecrease
+
 
   _resetPositionSlot(positionSlot)
   positionSlot.save()
@@ -379,7 +391,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.maxCollateral = positionSlot.maxCollateral
   positionSettled.maxSize = positionSlot.maxSize
 
-  positionSettled.settlePrice = price
+  positionSettled.settlePrice = positionSlot.lastDecreasedPrice
   positionSettled.isLiquidated = false
 
   positionSettled.blockNumber = event.block.number
@@ -387,6 +399,10 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.transactionHash = event.transaction.hash.toHexString()
   positionSettled.transactionIndex = event.transaction.index
   positionSettled.logIndex = event.logIndex
+  positionSettled.openTime=positionSlot.blockTimestamp
+  positionSettled.closeTime=event.block.timestamp
+  positionSettled.numberOfIncrease=positionSlot.numberOfIncrease
+  positionSettled.numberOfDecrease=positionSlot.numberOfDecrease
 
   _resetPositionSlot(positionSlot)
   positionSlot.save()
@@ -434,7 +450,13 @@ function _resetPositionSlot(positionSlot: PositionSlot): PositionSlot {
 
   positionSlot.maxCollateral = ZERO_BI
   positionSlot.maxSize = ZERO_BI
-
+  positionSlot.blockNumber = ZERO_BI
+  positionSlot.blockTimestamp = ZERO_BI
+  positionSlot.numberOfIncrease=ZERO_BI
+  positionSlot.numberOfDecrease=ZERO_BI
+  positionSlot.lastIncreasedTimestamp=ZERO_BI
+  positionSlot.lastDecreasedTimestamp=ZERO_BI
+  positionSlot.lastDecreasedPrice=ZERO_BI
   return positionSlot
 }
 
