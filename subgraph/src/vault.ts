@@ -456,6 +456,7 @@ function _resetPositionSlot(positionSlot: PositionSlot): PositionSlot {
   positionSlot.numberOfDecrease=ZERO_BI
   positionSlot.lastIncreasedTimestamp=ZERO_BI
   positionSlot.lastDecreasedTimestamp=ZERO_BI
+  positionSlot.lastDecreasedPrice=ZERO_BI
   return positionSlot
 }
 
