@@ -575,6 +575,7 @@ type Trades @entity(immutable: true) {
   entryFundingRate: BigInt!
   reserveAmount: BigInt!
   realisedPnl: BigInt!
+  # isLong: Boolean!
 }
 
 type TraderAnalytics @entity(immutable: true) {
