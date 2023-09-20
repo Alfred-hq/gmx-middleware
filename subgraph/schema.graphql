@@ -557,17 +557,14 @@ type Trades @entity(immutable: true) {
   key: String!
   account: String!
   status: String!
-  collateralToken: BigInt!
+  collateralToken: String!
   indexToken: String!
   collateral: BigInt!
   collateralDelta: BigInt!
   size: BigInt
   sizeDelta: BigInt!
-  leverage: BigInt!
-  pnl: BigInt!
   token: BigInt!
-  positionSide: BigInt!
-  txnHash: BigInt!
+  positionSide: String!
   fee: BigInt!
   price: BigInt!
   averagePrice: BigInt!
@@ -575,9 +572,13 @@ type Trades @entity(immutable: true) {
   blockTimestamp: BigInt!
   transactionHash: String!
   logIndex: BigInt!
+  entryFundingRate: BigInt!
+  reserveAmount: BigInt!
+  realisedPnl: BigInt!
 }
 
 type TraderAnalytics @entity(immutable: true) {
+  id: String!
   account: String!
   totalSize: BigInt!
   totalCollateral: BigInt!

@@ -13,10 +13,10 @@ export function handleIncreaseTrades(
   PositionLinkId
 ): void {
   const trades = new Trades(
-    `${event.params.transactionHash}_${event.params.logIndex}`
+    `${event.transaction.hash.transactionHash}_${event.logIndex}`
   );
 
-  trades.id = `${event.params.transactionHash}_${event.params.logIndex}`;
+  trades.id = `${event.transaction.hash.toHexString()}_${event.logIndex}`;
   trades.link = PositionLinkId.toHexString();
   trades.key = event.params.key.toHexString();
   trades.account = event.params.account.toHexString();
@@ -31,13 +31,14 @@ export function handleIncreaseTrades(
   trades.blockTimestamp = event.block.timestamp;
   trades.transactionHash = event.transaction.hash.toHexString();
   trades.logIndex = event.logIndex;
+  trades.status = "Increase";
 
   trades.save();
 }
 
 export function handleUpdateTrades(event: UpdatePositionEvent): void {
   const trades = Trades.load(
-    `${event.params.transactionHash}_${event.params.logIndex - 1}`
+    `${event.transaction.hash.toHexString()}_${event.logIndex - 1}`
   );
 
   if (trades === null) return;
@@ -49,7 +50,9 @@ export function handleUpdateTrades(event: UpdatePositionEvent): void {
   trades.reserveAmount = event.params.reserveAmount;
   trades.realisedPnl = event.params.realisedPnl;
   trades.status =
-    event.params.size == event.params.sizeDelta ? "Open" : "Increase";
+    trades.status !== "Decrease" && event.params.size == trades.sizeDelta
+      ? "Open"
+      : trades.status;
 
   trades.save();
 }
@@ -59,7 +62,7 @@ export function handleDecreaseTrades(
   PositionLinkId
 ): void {
   const trades = new Trades(
-    `${event.params.transactionHash}_${event.params.logIndex}`
+    `${event.transaction.hash.toHexString()}_${event.logIndex}`
   );
 
   trades.link = PositionLinkId.toHexString();
@@ -76,13 +79,14 @@ export function handleDecreaseTrades(
   trades.blockTimestamp = event.block.timestamp;
   trades.transactionHash = event.transaction.hash.toHexString();
   trades.logIndex = event.logIndex;
+  trades.status = "Decrease";
 
   trades.save();
 }
 
 export function handleCloseTrades(event: ClosePositionEvent): void {
   const trades = Trades.load(
-    `${event.params.transactionHash}_${event.params.logIndex - 1}`
+    `${event.transaction.hash.toHexString()}_${event.logIndex - 1}`
   );
 
   if (trades === null) return;
@@ -103,10 +107,10 @@ export function handleLiquidateTrades(
   PositionLinkId
 ) {
   const trades = new Trades(
-    `${event.params.transactionHash}_${event.params.logIndex}`
+    `${event.transaction.hash.toHexString()}_${event.logIndex}`
   );
 
-  trades.id = `${event.params.transactionHash}_${event.params.logIndex}`;
+  trades.id = `${event.transaction.hash.toHexString()}_${event.logIndex}`;
   trades.link = PositionLinkId.toHexString();
   trades.key = event.params.key.toHexString();
   trades.account = event.params.account.toHexString();
@@ -116,7 +120,7 @@ export function handleLiquidateTrades(
   trades.sizeDelta = event.params.size;
   trades.positionSide = event.params.isLong ? "LONG" : "SHORT";
   trades.price = event.params.price;
-  trades.fee = BigInt.fromString('0');
+  trades.fee = BigInt.fromString("0");
   trades.blockNumber = event.block.number;
   trades.blockTimestamp = event.block.timestamp;
   trades.transactionHash = event.transaction.hash.toHexString();

@@ -341,7 +341,7 @@ export function handleLiquidatePosition(event: LiquidatePositionEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   );
 
-  entity.link = .toHexString();
+  entity.link = positionLinkId.toHexString();
   entity.key = event.params.key.toHexString();
   entity.account = event.params.account.toHexString();
   entity.collateralToken = event.params.collateralToken.toHexString();
