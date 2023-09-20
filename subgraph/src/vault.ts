@@ -34,6 +34,7 @@ import {
   updateCloseTradeAnalytics,
   updateLiquidateTradeAnalytics,
 } from "./traderAnalytics";
+import { handleClosePositionTraderAnalytics, handleDecreaseTraderAnalytics, handleIncreaseTraderAnalytics, handleLiquidatePositionTraderAnalytics, handleUpdatePositionTraderAnalytics } from "./traderAnalyticsWithInterval";
 
 const vaultPricefeedAddress = Address.fromString(
   "0x2d68011bcA022ed0E474264145F46CC4de96a002"
@@ -44,6 +45,7 @@ const getPositionLinkId = (id: i32, key: Bytes): Bytes => {
 };
 
 export function handleIncreasePosition(event: IncreasePositionEvent): void {
+  
   let positionSlot = PositionSlot.load(event.params.key.toHexString());
 
   // init slot
@@ -120,6 +122,7 @@ export function handleIncreasePosition(event: IncreasePositionEvent): void {
 
   handleIncreaseTrades(event, PositionLinkId);
   updateIncreaseTradeAnalytics(event);
+  handleIncreaseTraderAnalytics(event)
 
   const entity = new IncreasePosition(
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
@@ -174,7 +177,7 @@ export function handleDecreasePosition(event: DecreasePositionEvent): void {
 
   handleDecreaseTrades(event, positionLinkId);
   updateDecreaseTradeAnalytics(event);
-
+  handleDecreaseTraderAnalytics(event)
   const entity = new DecreasePosition(
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   );
@@ -237,7 +240,7 @@ export function handleUpdatePosition(event: UpdatePositionEvent): void {
 
   handleUpdateTrades(event);
   updateUpdateTradeAnalytics(event);
-
+  handleUpdatePositionTraderAnalytics(event)
   const entity = new UpdatePosition(
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   );
@@ -347,6 +350,7 @@ export function handleLiquidatePosition(event: LiquidatePositionEvent): void {
 
   handleLiquidateTrades(event, positionLinkId);
   updateLiquidateTradeAnalytics(event);
+  handleLiquidatePositionTraderAnalytics(event)
 
   const entity = new LiquidatePosition(
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
@@ -480,7 +484,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
 
   handleCloseTrades(event);
   updateCloseTradeAnalytics(event);
-
+  handleClosePositionTraderAnalytics(event)
   entity.link = getPositionLinkId(
     positionSlot.idCount,
     event.params.key

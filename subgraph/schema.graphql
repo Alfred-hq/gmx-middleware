@@ -593,3 +593,21 @@ type TraderAnalytics @entity(immutable: true) {
   lastOpenPositionAt: BigInt!
   totalLiquidated: BigInt!
 }
+
+ type TraderAnalyticsDaily @entity(immutable: true) {
+  id: String!
+  account: String!
+  cumulativeSize: BigInt!
+  cumulativeFee: BigInt!
+  cumulativeCollateral: BigInt!
+  maxSize: BigInt!
+  maxCollateral: BigInt!
+  cumulativePnl: BigInt!
+  openCount: BigInt!
+  totalPositions: BigInt!
+  increaseCount: BigInt!
+  decreaseCount: BigInt!
+  lastSettledPositionAt: BigInt!
+  lastOpenPositionAt: BigInt!
+  totalLiquidated: BigInt!
+ }
