@@ -554,27 +554,27 @@ type UpdateSwapOrder @entity(immutable: true) {
 type Trades @entity(immutable: true) {
   id: String!
   link: PositionLink!
-  key: String!
-  account: String!
-  status: String!
-  collateralToken: String!
-  indexToken: String!
-  collateral: BigInt!
-  collateralDelta: BigInt!
+  key: String
+  account: String
+  status: String
+  collateralToken: String
+  indexToken: String
+  collateral: BigInt
+  collateralDelta: BigInt
   size: BigInt
   sizeDelta: BigInt!
-  token: BigInt!
-  positionSide: String!
-  fee: BigInt!
-  price: BigInt!
-  averagePrice: BigInt!
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: String!
-  logIndex: BigInt!
-  entryFundingRate: BigInt!
-  reserveAmount: BigInt!
-  realisedPnl: BigInt!
+  token: BigInt
+  positionSide: String
+  fee: BigInt
+  price: BigInt
+  averagePrice: BigInt
+  blockNumber: BigInt
+  blockTimestamp: BigInt
+  transactionHash: String
+  logIndex: BigInt
+  entryFundingRate: BigInt
+  reserveAmount: BigInt
+  realisedPnl: BigInt
   # isLong: Boolean!
 }
 
