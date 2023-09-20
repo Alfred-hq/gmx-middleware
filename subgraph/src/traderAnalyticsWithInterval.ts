@@ -40,6 +40,8 @@ export function handleUpdatePositionTraderAnalytics(event:UpdatePositionEvent): 
     const trades = Trades.load(
         `${event.transaction.hash.toHexString()}_${event.logIndex.minus(BigInt.fromString('1')).toString()}`
       );
+      if(!trades) return;
+      if(trades.account === null) return
     let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,trades.account);
     dayPeriodData.cumulativePnl=dayPeriodData.cumulativePnl.plus(event.params.realisedPnl);
     dayPeriodData.openCount = trades.status === "Open" ? dayPeriodData.openCount.plus(BigInt.fromString("1")) : dayPeriodData.openCount;
