@@ -12,7 +12,7 @@ import {
   LiquidatePosition as LiquidatePositionEvent,
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
-import BigInt from "@graphprotocol/graph-ts";
+import {BigInt} from "@graphprotocol/graph-ts";
 
 export function updateIncreaseTradeAnalytics(
   event: IncreasePositionEvent
@@ -42,7 +42,7 @@ export function updateIncreaseTradeAnalytics(
     return;
   }
 
-  trades.increaseCount = trades.increaseCount + BigInt.fromString("1");
+  trades.increaseCount = trades.increaseCount.plus(BigInt.fromString("1"));
   trades.cumulativeSize = event.params.sizeDelta.plus(trades.cumulativeSize);
   trades.cumulativeCollateral = event.params.collateralDelta.plus(
     trades.cumulativeCollateral
@@ -80,7 +80,7 @@ export function updateDecreaseTradeAnalytics(
     return;
   }
 
-  trades.decreaseCount = trades.decreaseCount + BigInt.fromString("1");
+  trades.decreaseCount = trades.decreaseCount.plus(BigInt.fromString("1"));
   trades.cumulativeFee = event.params.fee.plus(trades.cumulativeFee);
 
   trades.save();
@@ -181,10 +181,10 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
 
   trades.lastSettledPositionAt = event.block.timestamp;
   trades.openCount =
-    trades.openCount <= BigInt.fromString("0")
+    trades.openCount.lt(BigInt.fromString("1"))
       ? BigInt.fromString("0")
       : trades.openCount.minus(BigInt.fromString("1"));
-  trades.totalPositions = trades.totalPositions.plus(BigInt.String("1"));
+  trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
 
   trades.save();
 }
@@ -220,11 +220,11 @@ export function updateLiquidateTradeAnalytics(
     return;
   }
 
-  trades.totalPositions = trades.totalPositions.plus(BigInt.String("1"));
-  trades.totalLiquidated = trades.totalLiquidated.plus(BigInt.String("1"));
+  trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
+  trades.totalLiquidated = trades.totalLiquidated.plus(BigInt.fromString("1"));
   trades.lastSettledPositionAt = event.block.timestamp;
   trades.openCount =
-    trades.openCount <= BigInt.fromString("0")
+    trades.openCount.lt(BigInt.fromString("1"))
       ? BigInt.fromString("0")
       : trades.openCount.minus(BigInt.fromString("1"));
 
