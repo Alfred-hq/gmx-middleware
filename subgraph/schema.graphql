@@ -228,7 +228,7 @@ type PositionSlot @entity {
   blockTimestamp: BigInt!
   lastIncreasedTimestamp: BigInt!
   lastDecreasedTimestamp: BigInt!
-  numberOfIncrease:BigInt!
+  numberOfIncrease: BigInt!
   numberOfDecrease: BigInt!
   lastDecreasedPrice: BigInt!
 }
@@ -268,7 +268,7 @@ type PositionSettled @entity(immutable: true) {
   logIndex: BigInt!
   openTime: BigInt!
   closeTime: BigInt!
-  numberOfIncrease:BigInt!
+  numberOfIncrease: BigInt!
   numberOfDecrease: BigInt!
 }
 
@@ -563,7 +563,6 @@ type Trades @entity(immutable: true) {
   collateralDelta: BigInt!
   size: BigInt
   sizeDelta: BigInt!
-  token: BigInt!
   positionSide: String!
   fee: BigInt!
   price: BigInt!
@@ -575,21 +574,22 @@ type Trades @entity(immutable: true) {
   entryFundingRate: BigInt!
   reserveAmount: BigInt!
   realisedPnl: BigInt!
-  # isLong: Boolean!
 }
 
 type TraderAnalytics @entity(immutable: true) {
   id: String!
   account: String!
-  totalSize: BigInt!
-  totalCollateral: BigInt!
+  cumulativeSize: BigInt!
+  cumulativeFee: BigInt!
+  cumulativeCollateral: BigInt!
   maxSize: BigInt!
   maxCollateral: BigInt!
-  totalPnl: BigInt!
+  cumulativePnl: BigInt!
   openCount: BigInt!
   totalPositions: BigInt!
   increaseCount: BigInt!
   decreaseCount: BigInt!
   lastSettledPositionAt: BigInt!
   lastOpenPositionAt: BigInt!
+  totalLiquidated: BigInt!
 }
