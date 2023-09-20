@@ -555,7 +555,7 @@ type Trades @entity(immutable: true) {
   id: String!
   link: PositionLink!
   key: String
-  account: String
+  account: String!
   status: String
   collateralToken: String
   indexToken: String

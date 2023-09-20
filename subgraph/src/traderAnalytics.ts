@@ -12,7 +12,7 @@ import {
   LiquidatePosition as LiquidatePositionEvent,
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
-import {BigInt} from "@graphprotocol/graph-ts";
+import { BigInt } from "@graphprotocol/graph-ts";
 
 export function updateIncreaseTradeAnalytics(
   event: IncreasePositionEvent
@@ -87,22 +87,20 @@ export function updateDecreaseTradeAnalytics(
 }
 
 export function updateUpdateTradeAnalytics(event: UpdatePositionEvent): void {
-  const updatePositionTable = UpdatePosition.load(
-    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
-  );
-
   const tradesTable = Trades.load(
     `${event.transaction.hash.toHexString()}_${event.logIndex
       .minus(BigInt.fromString("1"))
       .toString()}`
   );
 
-  let trades = TraderAnalytics.load(updatePositionTable.account);
+  if (tradesTable === null) return;
+
+  let trades = TraderAnalytics.load(tradesTable.account);
 
   if (trades === null) {
-    trades = new TraderAnalytics(updatePositionTable.account);
-    trades.id = updatePositionTable.account;
-    trades.account = updatePositionTable.account;
+    trades = new TraderAnalytics(tradesTable.account);
+    trades.id = tradesTable.account;
+    trades.account = tradesTable.account;
     trades.cumulativeSize = BigInt.fromString("0");
     trades.cumulativeCollateral = BigInt.fromString("0");
     trades.cumulativeFee = BigInt.fromString("0");
@@ -151,6 +149,8 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   );
 
+  if (decreasePositionTable === null) return;
+
   let trades = TraderAnalytics.load(decreasePositionTable.account);
 
   if (trades === null) {
@@ -163,10 +163,9 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
     trades.maxSize = BigInt.fromString("0");
     trades.maxCollateral = BigInt.fromString("0");
     trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount =
-      trades.openCount <= BigInt.fromString("0")
-        ? BigInt.fromString("0")
-        : trades.openCount.minus(BigInt.fromString("1"));
+    trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
+      ? BigInt.fromString("0")
+      : trades.openCount.minus(BigInt.fromString("1"));
     trades.totalPositions = BigInt.fromString("1");
     trades.increaseCount = BigInt.fromString("0");
     trades.decreaseCount = BigInt.fromString("0");
@@ -180,10 +179,9 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
   }
 
   trades.lastSettledPositionAt = event.block.timestamp;
-  trades.openCount =
-    trades.openCount.lt(BigInt.fromString("1"))
-      ? BigInt.fromString("0")
-      : trades.openCount.minus(BigInt.fromString("1"));
+  trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
+    ? BigInt.fromString("0")
+    : trades.openCount.minus(BigInt.fromString("1"));
   trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
 
   trades.save();
@@ -204,10 +202,9 @@ export function updateLiquidateTradeAnalytics(
     trades.maxSize = BigInt.fromString("0");
     trades.maxCollateral = BigInt.fromString("0");
     trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount =
-      trades.openCount <= BigInt.fromString("0")
-        ? BigInt.fromString("0")
-        : trades.openCount.minus(BigInt.fromString("1"));
+    trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
+      ? BigInt.fromString("0")
+      : trades.openCount.minus(BigInt.fromString("1"));
     trades.totalPositions = BigInt.fromString("1");
     trades.increaseCount = BigInt.fromString("0");
     trades.decreaseCount = BigInt.fromString("0");
@@ -223,10 +220,9 @@ export function updateLiquidateTradeAnalytics(
   trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
   trades.totalLiquidated = trades.totalLiquidated.plus(BigInt.fromString("1"));
   trades.lastSettledPositionAt = event.block.timestamp;
-  trades.openCount =
-    trades.openCount.lt(BigInt.fromString("1"))
-      ? BigInt.fromString("0")
-      : trades.openCount.minus(BigInt.fromString("1"));
+  trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
+    ? BigInt.fromString("0")
+    : trades.openCount.minus(BigInt.fromString("1"));
 
   trades.save();
 }
