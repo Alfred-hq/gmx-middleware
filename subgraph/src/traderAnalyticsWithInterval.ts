@@ -13,7 +13,7 @@ import { ZERO_BI } from "./const";
 export function handleIncreaseTraderAnalytics(event:IncreasePositionEvent): void{
 let dayPeriodId=getDailyId(event)
 
-let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toString())
+let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toHexString())
 if(dayPeriodData){
     dayPeriodData.increaseCount=dayPeriodData.increaseCount.plus(BigInt.fromString("1"))
     dayPeriodData.cumulativeCollateral=dayPeriodData.cumulativeCollateral.plus(event.params.collateralDelta)
@@ -26,7 +26,7 @@ if(dayPeriodData){
 export function handleDecreaseTraderAnalytics(event:DecreasePositionEvent): void{
     let dayPeriodId=getDailyId(event)
     
-    let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toString())
+    let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toHexString())
     if(dayPeriodData){
         dayPeriodData.decreaseCount=dayPeriodData.decreaseCount.plus(BigInt.fromString("1"))
         dayPeriodData.cumulativeFee=dayPeriodData.cumulativeFee.plus(event.params.fee)
@@ -69,7 +69,7 @@ export function handleClosePositionTraderAnalytics(event: ClosePositionEvent): v
 
 export function handleLiquidatePositionTraderAnalytics(event: LiquidatePositionEvent): void{
     let dayPeriodId=getDailyId(event)
-    let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toString());
+    let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,event.params.account.toHexString());
     // dayPeriodData.cumulativeFee=dayPeriodData.cumulativeFee.plus(event.params.)
     dayPeriodData.totalLiquidated=dayPeriodData.totalLiquidated.plus(BigInt.fromString("1"));
     dayPeriodData.totalPositions=dayPeriodData.totalPositions.plus(BigInt.fromString("1"));
@@ -84,6 +84,7 @@ if(temp){
     return temp
 }
 temp=new TraderAnalyticsDaily(`${periodId}_${account}`)
+let hourStartUnix = periodId * 86400
 temp.account=account
 temp.increaseCount=ZERO_BI
 temp.cumulativeSize=ZERO_BI
@@ -99,6 +100,7 @@ temp.decreaseCount=ZERO_BI
 temp.lastSettledPositionAt=ZERO_BI
 temp.lastOpenPositionAt=ZERO_BI
 temp.totalLiquidated=ZERO_BI
-
+temp.startTime=BigInt.fromI32(hourStartUnix)
+temp.save()
 return temp
 }

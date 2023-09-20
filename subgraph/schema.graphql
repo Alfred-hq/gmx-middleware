@@ -576,7 +576,7 @@ type Trades @entity(immutable: true) {
   realisedPnl: BigInt
 }
 
-type TraderAnalytics @entity(immutable: true) {
+type TraderAnalytics @entity {
   id: String!
   account: String!
   cumulativeSize: BigInt!
@@ -594,8 +594,9 @@ type TraderAnalytics @entity(immutable: true) {
   totalLiquidated: BigInt!
 }
 
- type TraderAnalyticsDaily @entity(immutable: true) {
+ type TraderAnalyticsDaily @entity {
   id: String!
+  startTime: BigInt!
   account: String!
   cumulativeSize: BigInt!
   cumulativeFee: BigInt!
