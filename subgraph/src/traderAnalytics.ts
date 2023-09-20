@@ -17,12 +17,12 @@ import { BigInt } from "@graphprotocol/graph-ts";
 export function updateIncreaseTradeAnalytics(
   event: IncreasePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toString());
+  let trades = TraderAnalytics.load(event.params.account.toHexString());
 
   if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toString());
-    trades.id = event.params.account.toString();
-    trades.account = event.params.account.toString();
+    trades = new TraderAnalytics(event.params.account.toHexString());
+    trades.id = event.params.account.toHexString();
+    trades.account = event.params.account.toHexString();
     trades.cumulativeSize = event.params.sizeDelta;
     trades.cumulativeCollateral = event.params.collateralDelta;
     trades.cumulativeFee = event.params.fee;
@@ -55,12 +55,12 @@ export function updateIncreaseTradeAnalytics(
 export function updateDecreaseTradeAnalytics(
   event: DecreasePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toString());
+  let trades = TraderAnalytics.load(event.params.account.toHexString());
 
   if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toString());
-    trades.id = event.params.account.toString();
-    trades.account = event.params.account.toString();
+    trades = new TraderAnalytics(event.params.account.toHexString());
+    trades.id = event.params.account.toHexString();
+    trades.account = event.params.account.toHexString();
     trades.cumulativeSize = BigInt.fromString("0");
     trades.cumulativeCollateral = BigInt.fromString("0");
     trades.cumulativeFee = event.params.fee;
@@ -190,12 +190,12 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
 export function updateLiquidateTradeAnalytics(
   event: LiquidatePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toString());
+  let trades = TraderAnalytics.load(event.params.account.toHexString());
 
   if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toString());
-    trades.id = event.params.account.toString();
-    trades.account = event.params.account.toString();
+    trades = new TraderAnalytics(event.params.account.toHexString());
+    trades.id = event.params.account.toHexString();
+    trades.account = event.params.account.toHexString();
     trades.cumulativeSize = BigInt.fromString("0");
     trades.cumulativeCollateral = BigInt.fromString("0");
     trades.cumulativeFee = BigInt.fromString("0");
