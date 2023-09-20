@@ -1,4 +1,4 @@
-import { getDailyId } from "./interval";
+import { getDailyId } from "./helper";
 import {
     ClosePosition as ClosePositionEvent,
     DecreasePosition as DecreasePositionEvent,
@@ -54,12 +54,16 @@ export function handleClosePositionTraderAnalytics(event: ClosePositionEvent): v
     const trades = Trades.load(
         `${event.transaction.hash.toHexString()}_${event.logIndex.minus(BigInt.fromString('1')).toString()}`
       );
-    let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,trades.account);
-    dayPeriodData.lastSettledPositionAt = event.block.timestamp;
-    dayPeriodData.totalPositions=dayPeriodData.totalPositions.plus(BigInt.fromString("1"))
-    dayPeriodData.cumulativePnl=dayPeriodData.cumulativePnl.plus(event.params.realisedPnl)
-    dayPeriodData.save()
-}
+      if(!trades) return;
+      if(trades.account === null) return
+        let dayPeriodData=loadOrCreateTradeAnalyticsDaily(dayPeriodId,trades.account);
+        dayPeriodData.lastSettledPositionAt = event.block.timestamp;
+        dayPeriodData.totalPositions=dayPeriodData.totalPositions.plus(BigInt.fromString("1"))
+        dayPeriodData.cumulativePnl=dayPeriodData.cumulativePnl.plus(event.params.realisedPnl)
+        dayPeriodData.save()
+      }
+   
+
 
 export function handleLiquidatePositionTraderAnalytics(event: LiquidatePositionEvent): void{
     let dayPeriodId=getDailyId(event)
