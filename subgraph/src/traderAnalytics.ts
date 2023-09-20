@@ -192,16 +192,12 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
 export function updateLiquidateTradeAnalytics(
   event: LiquidatePositionEvent
 ): void {
-  const entity = UpdatePosition.load(
-    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
-  );
-
-  let trades = TraderAnalytics.load(entity.account);
+  let trades = TraderAnalytics.load(event.params.account.toString());
 
   if (trades === null) {
-    trades = new TraderAnalytics(entity.account);
-    trades.id = entity.account;
-    trades.account = entity.account;
+    trades = new TraderAnalytics(event.params.account.toString());
+    trades.id = event.params.account.toString();
+    trades.account = event.params.account.toString();
     trades.cumulativeSize = BigInt.fromString("0");
     trades.cumulativeCollateral = BigInt.fromString("0");
     trades.cumulativeFee = BigInt.fromString("0");
