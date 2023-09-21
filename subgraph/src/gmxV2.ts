@@ -93,7 +93,7 @@ export function handleEventLog1(event: EventLog1Event): void {
   const isFeeEvent = eventName == "PositionFeesCollected"
   const isIncEvent = eventName == "PositionIncrease"
   const isDecEvent = eventName == "PositionDecrease"
-  const data = new EventData(event.params.eventData as EventLog1EventDataStruct)
+  const data = new EventData(event.params.eventData)
 
   if (!isFeeEvent && !isIncEvent && !isDecEvent) {
     return

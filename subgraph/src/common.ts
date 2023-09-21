@@ -1,15 +1,13 @@
 import { ZERO_BI } from "./const";
 import { PositionSlotV2 } from "../generated/schema";
 
-
-export interface MarketData{indexToken: string,longToken:string,shortToken:string}
-export function getMarketData(marketAddress: string): MarketData{
+export function getMarketData(marketAddress: string): Array<string>{
     // add contract call to reader contract to get market data
     //for the current available market we can use constant file to reduce rpc calls
     const indexToken="0x000";
     const longToken="0x000";
     const shortToken="0x0000";
-    return {indexToken,longToken,shortToken}
+    return [indexToken,longToken,shortToken]
 }
 
 export function _resetPositionSlotV2(positionSlotV2: PositionSlotV2): PositionSlotV2 {

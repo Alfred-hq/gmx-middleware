@@ -73,9 +73,9 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         // to get long short and index token
         const marketData=getMarketData(marketToken)
         if(marketData){
-            indexToken=marketData.indexToken
-            longToken=marketData.longToken
-            shortToken=marketData.shortToken
+            indexToken=marketData[0]
+            longToken=marketData[1]
+            shortToken=marketData[2]
         }
         if(indexToken && longToken && shortToken){
             positionSlotV2.indexToken=indexToken

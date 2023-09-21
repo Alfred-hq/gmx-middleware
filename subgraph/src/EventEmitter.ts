@@ -26,10 +26,9 @@ export class EventData {
   getAddressItemString(key: string): string | null {
     let item = this.getAddressItem(key);
 
-    if (item != null) {
+    if (item !== null) {
       return item.toHexString();
     }
-
     return null;
   }
 
@@ -43,7 +42,7 @@ export class EventData {
   getAddressArrayItemString(key: string): Array<string> | null {
     let items = this.getAddressArrayItem(key);
 
-    if (items != null) {
+    if (items !== null) {
       let _items = items as Array<Address>;
       let strigsArray = new Array<string>(items.length);
 
