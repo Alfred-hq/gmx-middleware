@@ -119,19 +119,21 @@ export function updateLiquidateTradeAnalytics(
     ? BigInt.fromString("0")
     : trades.openCount.minus(BigInt.fromString("1"));
   trades.loseCount = trades.loseCount.plus(BigInt.fromString("1"));
-  trades.loseCountWithFee = trades.loseCountWithFee.plus(BigInt.fromString("1"));
+  trades.loseCountWithFee = trades.loseCountWithFee.plus(
+    BigInt.fromString("1")
+  );
 
   trades.save();
 }
 
-function initializeAnalyticsEntity(account) {
+function initializeAnalyticsEntity(account): TraderAnalytics {
   let trades = TraderAnalytics.load(account.toHexString());
 
   if (trades !== null) return trades;
 
   trades = new TraderAnalytics(account.toHexString());
-  trades.id = account;
-  trades.account = account;
+  trades.id = account.toHexString();
+  trades.account = account.toHexString();
   trades.cumulativeSize = ZERO_BI;
   trades.cumulativeCollateral = ZERO_BI;
   trades.cumulativeFee = ZERO_BI;
