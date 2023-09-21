@@ -6,8 +6,8 @@ import {
   LiquidatePosition as LiquidatePositionEvent,
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
-import { TraderAnalyticsDaily, Trades } from "../generated/schema";
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { PositionSlot, TraderAnalyticsDaily, Trades } from "../generated/schema";
+import { BigInt } from "@graphprotocol/graph-ts";
 import { ZERO_BI } from "./const";
 
 export function handleIncreaseTraderAnalytics(
@@ -72,12 +72,15 @@ export function handleUpdatePositionTraderAnalytics(
   dayPeriodData.cumulativePnl = dayPeriodData.cumulativePnl.plus(
     event.params.realisedPnl
   );
+
   dayPeriodData.openCount =
     trades.status === "Open"
       ? dayPeriodData.openCount.plus(BigInt.fromString("1"))
       : dayPeriodData.openCount;
+    
   dayPeriodData.lastOpenPositionAt =
-    trades.status === "Open" ? event.block.timestamp : BigInt.fromString("0");
+    trades.status === "Open" ? event.block.timestamp : dayPeriodData.lastOpenPositionAt;
+
   dayPeriodData.maxCollateral = dayPeriodData.maxCollateral.gt(
     event.params.collateral
   )
@@ -86,6 +89,7 @@ export function handleUpdatePositionTraderAnalytics(
   dayPeriodData.maxSize = dayPeriodData.maxSize.gt(event.params.size)
     ? dayPeriodData.maxSize
     : event.params.size;
+
   dayPeriodData.save();
 }
 
@@ -111,6 +115,26 @@ export function handleClosePositionTraderAnalytics(
   dayPeriodData.cumulativePnl = dayPeriodData.cumulativePnl.plus(
     event.params.realisedPnl
   );
+
+  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
+  if(positionSlotTable){
+    const netPnl = positionSlotTable.realisedPnl.minus(
+      positionSlotTable.cumulativeFee
+    );
+    dayPeriodData.winCountWithFee = netPnl.gt(BigInt.fromString("0"))
+    ? dayPeriodData.winCountWithFee.plus(BigInt.fromString("1"))
+    : dayPeriodData.winCountWithFee;
+    dayPeriodData.loseCountWithFee = netPnl.le(BigInt.fromString("0"))
+    ? dayPeriodData.loseCountWithFee.plus(BigInt.fromString("1"))
+    : dayPeriodData.loseCountWithFee;
+    dayPeriodData.winCount = positionSlotTable.realisedPnl.gt(BigInt.fromString("0"))
+    ? dayPeriodData.winCount.plus(BigInt.fromString("1"))
+    : dayPeriodData.winCount;
+    dayPeriodData.loseCount = positionSlotTable.realisedPnl.le(BigInt.fromString("0"))
+    ? dayPeriodData.loseCount.plus(BigInt.fromString("1"))
+    : dayPeriodData.loseCount;
+  }
+
   dayPeriodData.save();
 }
 
@@ -133,6 +157,11 @@ export function handleLiquidatePositionTraderAnalytics(
   dayPeriodData.openCount = dayPeriodData.openCount.lt(BigInt.fromString("1"))
     ? BigInt.fromString("0")
     : dayPeriodData.openCount.minus(BigInt.fromString("1"));
+
+    dayPeriodData.loseCount = dayPeriodData.loseCount.plus(BigInt.fromString("1"));
+    dayPeriodData.loseCountWithFee = dayPeriodData.loseCountWithFee.plus(
+    BigInt.fromString("1")
+  );
   dayPeriodData.save();
 }
 

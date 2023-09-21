@@ -470,7 +470,10 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   positionSettled.closeTime = event.block.timestamp;
   positionSettled.numberOfIncrease = positionSlot.numberOfIncrease;
   positionSettled.numberOfDecrease = positionSlot.numberOfDecrease;
-
+  // need position slot data here so calling this handlers before resetting position slot 
+  handleCloseTrades(event);
+  updateCloseTradeAnalytics(event);
+  handleClosePositionTraderAnalytics(event)
   _resetPositionSlot(positionSlot);
   positionSlot.save();
   positionSettled.save();
@@ -482,10 +485,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
   if (positionSlot === null) {
     throw new Error("positionSlot is null");
   }
-
-  handleCloseTrades(event);
-  updateCloseTradeAnalytics(event);
-  handleClosePositionTraderAnalytics(event)
+ 
   entity.link = getPositionLinkId(
     positionSlot.idCount,
     event.params.key
