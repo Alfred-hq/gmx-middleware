@@ -432,6 +432,7 @@ export function handleClosePosition(event: ClosePositionEvent): void {
     positionLink.isLiquidated = false;
     positionLink.size = positionSlot.size;
     positionLink.collateral = positionSlot.collateral;
+    positionLink.blockTimestamp = event.block.timestamp;
     positionLink.save();
   }
   positionSettled.idCount = positionSlot.idCount;
