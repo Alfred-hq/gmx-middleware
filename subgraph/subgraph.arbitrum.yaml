@@ -81,7 +81,7 @@ dataSources:
     source:
       address: "0x09f77E8A13De9a35a7231028187e9fD5DB8a2ACB"
       abi: OrderBookContract
-      startBlock: 2329450 
+      startBlock: 2329450
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
@@ -152,3 +152,31 @@ dataSources:
             address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
           handler: handleUpdateSwapOrder
       file: ./src/orderBook.ts
+  - kind: ethereum
+    name: EventEmitter
+    network: arbitrum-one
+    source:
+      address: "0xC8ee91A54287DB53897056e12D9819156D3822Fb"
+      abi: EventEmitter
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - EventLog
+        - EventLog1
+        - EventLog2
+      abis:
+        - name: EventEmitter
+          file: ./abis/EventEmitter.json
+      eventHandlers:
+        - event: EventLog(address,string,indexed
+            string,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
+          handler: handleEventLog
+        - event: EventLog1(address,string,indexed string,indexed
+            bytes32,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
+          handler: handleEventLog1
+        - event: EventLog2(address,string,indexed string,indexed bytes32,indexed
+            bytes32,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
+          handler: handleEventLog2
+      file: ./src/gmxV2.ts
