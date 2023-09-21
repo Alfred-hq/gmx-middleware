@@ -592,6 +592,10 @@ type TraderAnalytics @entity(immutable: true) {
   lastSettledPositionAt: BigInt!
   lastOpenPositionAt: BigInt!
   totalLiquidated: BigInt!
+  winCountWithFee: BigInt!
+  winCount: BigInt!
+  loseCountWithFee: BigInt!
+  loseCount: BigInt!
 }
 
  type TraderAnalyticsDaily @entity(immutable: true) {
@@ -610,4 +614,8 @@ type TraderAnalytics @entity(immutable: true) {
   lastSettledPositionAt: BigInt!
   lastOpenPositionAt: BigInt!
   totalLiquidated: BigInt!
+  winCountWithFee: BigInt!
+  winCount: BigInt!
+  loseCountWithFee: BigInt!
+  loseCount: BigInt!
  }
