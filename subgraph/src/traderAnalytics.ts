@@ -2,6 +2,7 @@ import {
   TraderAnalytics,
   UpdatePosition,
   IncreasePosition,
+  PositionSlot,
   DecreasePosition,
   Trades,
 } from "../generated/schema";
@@ -13,34 +14,12 @@ import {
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
 import { BigInt } from "@graphprotocol/graph-ts";
+import { ZERO_BI } from "./const";
 
 export function updateIncreaseTradeAnalytics(
   event: IncreasePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toHexString());
-
-  if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toHexString());
-    trades.id = event.params.account.toHexString();
-    trades.account = event.params.account.toHexString();
-    trades.cumulativeSize = event.params.sizeDelta;
-    trades.cumulativeCollateral = event.params.collateralDelta;
-    trades.cumulativeFee = event.params.fee;
-    trades.maxSize = event.params.sizeDelta;
-    trades.maxCollateral = event.params.collateralDelta;
-    trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount = BigInt.fromString("0");
-    trades.totalPositions = BigInt.fromString("0");
-    trades.increaseCount = BigInt.fromString("1");
-    trades.decreaseCount = BigInt.fromString("0");
-    trades.lastSettledPositionAt = BigInt.fromString("0");
-    trades.lastOpenPositionAt = BigInt.fromString("0");
-    trades.totalLiquidated = BigInt.fromString("0");
-
-    trades.save();
-
-    return;
-  }
+  const trades = initializeAnalyticsEntity(event.params.account);
 
   trades.increaseCount = trades.increaseCount.plus(BigInt.fromString("1"));
   trades.cumulativeSize = event.params.sizeDelta.plus(trades.cumulativeSize);
@@ -55,30 +34,7 @@ export function updateIncreaseTradeAnalytics(
 export function updateDecreaseTradeAnalytics(
   event: DecreasePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toHexString());
-
-  if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toHexString());
-    trades.id = event.params.account.toHexString();
-    trades.account = event.params.account.toHexString();
-    trades.cumulativeSize = BigInt.fromString("0");
-    trades.cumulativeCollateral = BigInt.fromString("0");
-    trades.cumulativeFee = event.params.fee;
-    trades.maxSize = BigInt.fromString("0");
-    trades.maxCollateral = BigInt.fromString("0");
-    trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount = BigInt.fromString("0");
-    trades.totalPositions = BigInt.fromString("0");
-    trades.increaseCount = BigInt.fromString("0");
-    trades.decreaseCount = BigInt.fromString("1");
-    trades.lastSettledPositionAt = BigInt.fromString("0");
-    trades.lastOpenPositionAt = BigInt.fromString("0");
-    trades.totalLiquidated = BigInt.fromString("0");
-
-    trades.save();
-
-    return;
-  }
+  const trades = initializeAnalyticsEntity(event.params.account);
 
   trades.decreaseCount = trades.decreaseCount.plus(BigInt.fromString("1"));
   trades.cumulativeFee = event.params.fee.plus(trades.cumulativeFee);
@@ -95,36 +51,7 @@ export function updateUpdateTradeAnalytics(event: UpdatePositionEvent): void {
 
   if (tradesTable === null) return;
 
-  let trades = TraderAnalytics.load(tradesTable.account);
-
-  if (trades === null) {
-    trades = new TraderAnalytics(tradesTable.account);
-    trades.id = tradesTable.account;
-    trades.account = tradesTable.account;
-    trades.cumulativeSize = BigInt.fromString("0");
-    trades.cumulativeCollateral = BigInt.fromString("0");
-    trades.cumulativeFee = BigInt.fromString("0");
-    trades.maxSize = event.params.size;
-    trades.maxCollateral = event.params.collateral;
-    trades.cumulativePnl = event.params.realisedPnl;
-    trades.openCount =
-      tradesTable.status === "Open"
-        ? BigInt.fromString("1")
-        : BigInt.fromString("0");
-    trades.totalPositions = BigInt.fromString("0");
-    trades.increaseCount = BigInt.fromString("0");
-    trades.decreaseCount = BigInt.fromString("0");
-    trades.lastSettledPositionAt = BigInt.fromString("0");
-    trades.lastOpenPositionAt =
-      tradesTable.status === "Open"
-        ? event.block.timestamp
-        : BigInt.fromString("0");
-    trades.totalLiquidated = BigInt.fromString("0");
-
-    trades.save();
-
-    return;
-  }
+  const trades = initializeAnalyticsEntity(tradesTable.account);
 
   trades.maxCollateral =
     event.params.collateral > trades.maxCollateral
@@ -149,40 +76,33 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
     event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
   );
 
-  if (decreasePositionTable === null) return;
+  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
 
-  let trades = TraderAnalytics.load(decreasePositionTable.account);
+  if (decreasePositionTable === null || positionSlotTable === null) return;
 
-  if (trades === null) {
-    trades = new TraderAnalytics(decreasePositionTable.account);
-    trades.id = decreasePositionTable.account;
-    trades.account = decreasePositionTable.account;
-    trades.cumulativeSize = BigInt.fromString("0");
-    trades.cumulativeCollateral = BigInt.fromString("0");
-    trades.cumulativeFee = BigInt.fromString("0");
-    trades.maxSize = BigInt.fromString("0");
-    trades.maxCollateral = BigInt.fromString("0");
-    trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
-      ? BigInt.fromString("0")
-      : trades.openCount.minus(BigInt.fromString("1"));
-    trades.totalPositions = BigInt.fromString("1");
-    trades.increaseCount = BigInt.fromString("0");
-    trades.decreaseCount = BigInt.fromString("0");
-    trades.lastSettledPositionAt = event.block.timestamp;
-    trades.lastOpenPositionAt = BigInt.fromString("0");
-    trades.totalLiquidated = BigInt.fromString("0");
+  const netPnl = positionSlotTable.realisedPnl.minus(
+    positionSlotTable.cumulativeFee
+  );
 
-    trades.save();
-
-    return;
-  }
+  const trades = initializeAnalyticsEntity(decreasePositionTable.account);
 
   trades.lastSettledPositionAt = event.block.timestamp;
   trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
     ? BigInt.fromString("0")
     : trades.openCount.minus(BigInt.fromString("1"));
   trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
+  trades.winCountWithFee = netPnl.gt(BigInt.fromString("0"))
+    ? trades.winCountWithFee.plus(BigInt.fromString("1"))
+    : trades.winCountWithFee;
+  trades.loseCountWithFee = netPnl.le(BigInt.fromString("0"))
+    ? trades.loseCountWithFee.plus(BigInt.fromString("1"))
+    : trades.loseCountWithFee;
+  trades.winCount = positionSlotTable.realisedPnl.gt(BigInt.fromString("0"))
+    ? trades.winCount.plus(BigInt.fromString("1"))
+    : trades.winCount;
+  trades.loseCount = positionSlotTable.realisedPnl.le(BigInt.fromString("0"))
+    ? trades.loseCount.plus(BigInt.fromString("1"))
+    : trades.loseCount;
 
   trades.save();
 }
@@ -190,32 +110,7 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
 export function updateLiquidateTradeAnalytics(
   event: LiquidatePositionEvent
 ): void {
-  let trades = TraderAnalytics.load(event.params.account.toHexString());
-
-  if (trades === null) {
-    trades = new TraderAnalytics(event.params.account.toHexString());
-    trades.id = event.params.account.toHexString();
-    trades.account = event.params.account.toHexString();
-    trades.cumulativeSize = BigInt.fromString("0");
-    trades.cumulativeCollateral = BigInt.fromString("0");
-    trades.cumulativeFee = BigInt.fromString("0");
-    trades.maxSize = BigInt.fromString("0");
-    trades.maxCollateral = BigInt.fromString("0");
-    trades.cumulativePnl = BigInt.fromString("0");
-    trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
-      ? BigInt.fromString("0")
-      : trades.openCount.minus(BigInt.fromString("1"));
-    trades.totalPositions = BigInt.fromString("1");
-    trades.increaseCount = BigInt.fromString("0");
-    trades.decreaseCount = BigInt.fromString("0");
-    trades.lastSettledPositionAt = event.block.timestamp;
-    trades.lastOpenPositionAt = BigInt.fromString("0");
-    trades.totalLiquidated = BigInt.fromString("1");
-
-    trades.save();
-
-    return;
-  }
+  const trades = initializeAnalyticsEntity(event.params.account);
 
   trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
   trades.totalLiquidated = trades.totalLiquidated.plus(BigInt.fromString("1"));
@@ -223,6 +118,37 @@ export function updateLiquidateTradeAnalytics(
   trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
     ? BigInt.fromString("0")
     : trades.openCount.minus(BigInt.fromString("1"));
+  trades.loseCount = trades.loseCount.plus(BigInt.fromString("1"));
+  trades.loseCountWithFee = trades.loseCountWithFee.plus(BigInt.fromString("1"));
 
   trades.save();
+}
+
+function initializeAnalyticsEntity(account) {
+  let trades = TraderAnalytics.load(account.toHexString());
+
+  if (trades !== null) return trades;
+
+  trades = new TraderAnalytics(account.toHexString());
+  trades.id = account;
+  trades.account = account;
+  trades.cumulativeSize = ZERO_BI;
+  trades.cumulativeCollateral = ZERO_BI;
+  trades.cumulativeFee = ZERO_BI;
+  trades.maxSize = ZERO_BI;
+  trades.maxCollateral = ZERO_BI;
+  trades.cumulativePnl = ZERO_BI;
+  trades.openCount = ZERO_BI;
+  trades.totalPositions = ZERO_BI;
+  trades.increaseCount = ZERO_BI;
+  trades.decreaseCount = ZERO_BI;
+  trades.lastSettledPositionAt = ZERO_BI;
+  trades.lastOpenPositionAt = ZERO_BI;
+  trades.totalLiquidated = ZERO_BI;
+  trades.winCount = ZERO_BI;
+  trades.loseCount = ZERO_BI;
+  trades.winCountWithFee = ZERO_BI;
+  trades.loseCountWithFee = ZERO_BI;
+
+  return trades;
 }
