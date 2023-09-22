@@ -53,45 +53,48 @@ export function updateUpdateTradeAnalytics(event: UpdatePositionEvent): void {
 
   const trades = initializeAnalyticsEntity(tradesTable.account);
 
-  trades.maxCollateral =
-    event.params.collateral.gt(trades.maxCollateral)
-      ? event.params.collateral
-      : trades.maxCollateral;
-  trades.maxSize =
-    event.params.size.gt(trades.maxSize) ? event.params.size : trades.maxSize;
-  trades.cumulativePnl = trades.cumulativePnl.plus(event.params.realisedPnl);
+  trades.maxCollateral = event.params.collateral.gt(trades.maxCollateral)
+    ? event.params.collateral
+    : trades.maxCollateral;
+  trades.maxSize = event.params.size.gt(trades.maxSize)
+    ? event.params.size
+    : trades.maxSize;
 
   // last open position count is not changed if there is no new position
   trades.openCount =
-    tradesTable.status === "Open"
+    tradesTable.status == "Open"
       ? trades.openCount.plus(BigInt.fromString("1"))
       : trades.openCount;
 
-  // last open position will be forwarded if there is no new open position event 
+  // last open position will be forwarded if there is no new open position event
   trades.lastOpenPositionAt =
-    tradesTable.status === "Open"
+    tradesTable.status == "Open"
       ? event.block.timestamp
       : trades.lastOpenPositionAt;
-  
+
   trades.save();
 }
 
 export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
-  const decreasePositionTable = DecreasePosition.load(
-    event.transaction.hash.concatI32(event.logIndex.toI32()).toHexString()
+  const tradesTable = Trades.load(
+    `${event.transaction.hash.toHexString()}_${event.logIndex
+      .minus(BigInt.fromString("1"))
+      .toString()}`
   );
 
-  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
+  if (!tradesTable) return;
+  if (tradesTable.account === null) return;
 
-  if (decreasePositionTable === null || positionSlotTable === null) return;
+  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
 
   const netPnl = positionSlotTable.realisedPnl.minus(
     positionSlotTable.cumulativeFee
   );
 
-  const trades = initializeAnalyticsEntity(decreasePositionTable.account);
+  const trades = initializeAnalyticsEntity(tradesTable.account);
 
   trades.lastSettledPositionAt = event.block.timestamp;
+  trades.cumulativePnl = trades.cumulativePnl.plus(event.params.realisedPnl);
   trades.openCount = trades.openCount.lt(BigInt.fromString("1"))
     ? BigInt.fromString("0")
     : trades.openCount.minus(BigInt.fromString("1"));
