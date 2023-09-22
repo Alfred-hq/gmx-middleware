@@ -193,6 +193,8 @@ export function loadOrCreateTradeAnalyticsDaily(
   temp.startTime = BigInt.fromI32(hourStartUnix);
   temp.winCount = ZERO_BI;
   temp.loseCount = ZERO_BI;
+  temp.winCountWithFee = ZERO_BI;
+  temp.loseCountWithFee = ZERO_BI;
   temp.save();
   return temp;
 }
