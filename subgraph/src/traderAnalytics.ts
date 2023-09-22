@@ -87,6 +87,8 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
 
   const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
 
+  if (positionSlotTable === null) return;
+
   const netPnl = positionSlotTable.realisedPnl.minus(
     positionSlotTable.cumulativeFee
   );
