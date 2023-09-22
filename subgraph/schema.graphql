@@ -598,7 +598,7 @@ type TraderAnalytics @entity {
   loseCount: BigInt!
 }
 
- type TraderAnalyticsDaily @entity {
+type TraderAnalyticsDaily @entity {
   id: String!
   startTime: BigInt!
   account: String!
@@ -619,4 +619,15 @@ type TraderAnalytics @entity {
   winCount: BigInt!
   loseCountWithFee: BigInt!
   loseCount: BigInt!
- }
+}
+
+type PriceCandle @entity {
+  id: String!
+  token: String!
+  open: BigInt!
+  high: BigInt!
+  low: BigInt!
+  close: BigInt!
+  timestamp: Int! # start of period
+  period: String!
+}
