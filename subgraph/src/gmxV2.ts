@@ -3,14 +3,18 @@ import {
   EventLog1 as EventLog1Event,
   EventLog1EventDataStruct,
   EventLog2 as EventLog2Event,
+  EventLogEventDataStringItemsArrayItemsStruct,
   EventLogEventDataStruct
 } from "../generated/EventEmitter/EventEmitter"
 import { EventLog, EventLog1, EventLog2 } from "../generated/schema"
 import { handleDecreasePositionEventV2 } from "./decreasePosition";
 import { EventData } from "./EventEmitter"
 import { handleIncreasePositionEventV2 } from "./increasePosition";
+import { log } from '@graphprotocol/graph-ts'
+
 
 export function handleEventLog(event: EventLogEvent): void {
+  log.error("event log",[])
   // let entity = new EventLog(
   //   event.transaction.hash.concatI32(event.logIndex.toI32())
   // )
@@ -53,6 +57,7 @@ export function handleEventLog(event: EventLogEvent): void {
 }
 
 export function handleEventLog1(event: EventLog1Event): void {
+  log.error("event log 1",[])
   // let entity = new EventLog1(
   //   event.transaction.hash.concatI32(event.logIndex.toI32())
   // )
@@ -94,20 +99,23 @@ export function handleEventLog1(event: EventLog1Event): void {
   const isIncEvent = eventName == "PositionIncrease"
   const isDecEvent = eventName == "PositionDecrease"
   const data = new EventData(event.params.eventData)
-
+  log.error("event aaya {}",[eventName])
   if (!isFeeEvent && !isIncEvent && !isDecEvent) {
     return
   }
   if(isIncEvent){
+    log.error("increase event aaya",[])
       handleIncreasePositionEventV2(event,data)
   }
-  // if(isDecEvent){
-  //     handleDecreasePositionEventV2(event,data)
-  // }
+  if(isDecEvent){
+      log.error("decrease event aaya",[])
+      handleDecreasePositionEventV2(event,data)
+  }
   return
 }
 
 export function handleEventLog2(event: EventLog2Event): void {
+  log.error("event log 2",[])
   // let entity = new EventLog2(
   //   event.transaction.hash.concatI32(event.logIndex.toI32())
   // )

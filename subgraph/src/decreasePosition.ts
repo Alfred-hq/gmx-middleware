@@ -1,6 +1,6 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { EventLog1 } from "../generated/EventEmitter/EventEmitter"
-import { DecreasePositionV2, PositionSlotV2 } from "../generated/schema"
+import { DecreasePositionV2, PositionSettledV2, PositionSlotV2 } from "../generated/schema"
 import { _resetPositionSlotV2 } from "./common"
 import { ADDRESS_ZERO } from "./const"
 import { EventData } from "./EventEmitter"
@@ -43,7 +43,8 @@ import { returnValueOrZero } from "./increasePosition"
 
 export function handleDecreasePositionEventV2(event: EventLog1,data: EventData): void{
     let eventType="Decrease"
-        if(data.getUintItem("sizeInUsd") && data.getUintItem("sizeInUsd")  === BigInt.fromString("0")){
+    const sizeInUsd=data.getUintItem("sizeInUsd")
+    if(sizeInUsd && sizeInUsd.equals(BigInt.fromString("0"))){
             eventType="Close"
           
     }
@@ -51,7 +52,7 @@ export function handleDecreasePositionEventV2(event: EventLog1,data: EventData):
     if(positionSlotV2){
 
     if(eventType == 'Close'){
-        handlePositionSettled(event ,positionSlotV2)
+        handlePositionSettled(event ,positionSlotV2,data)
         _resetPositionSlotV2(positionSlotV2)
     }
    
@@ -74,15 +75,15 @@ if ( positionSlotV2 === null) {
     return null
 }
 const collateralInUsd=data.getUintItem("collateralAmount")
-const sizeInToken=data.getUintItem("sizeInToken")
+const sizeInToken=data.getUintItem("sizeInTokens")
 const sizeInUsd=data.getUintItem("sizeInUsd")
-const indexTokenPriceMax=data.getUintItem("indexTokenPriceMax")
-const indexTokenPriceMin=data.getUintItem("indexTokenPriceMin")
-const collateralTokenPriceMax=data.getUintItem("collateralTokenPriceMax")
-const collateralTokenPriceMin=data.getUintItem("collateralTokenPriceMin")
+const indexTokenPriceMax=data.getUintItem("indexTokenPrice.max")
+const indexTokenPriceMin=data.getUintItem("indexTokenPrice.min")
+const collateralTokenPriceMax=data.getUintItem("collateralTokenPrice.max")
+const collateralTokenPriceMin=data.getUintItem("collateralTokenPrice.min")
 const account=data.getAddressItem("account")
 const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
-const sizeDeltaInToken=data.getUintItem("sizeDeltaInToken")
+const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens")
 const executionPrice=data.getUintItem("executionPrice")
 const orderKey=data.getBytes32Item("orderKey")
 
@@ -147,8 +148,53 @@ return positionSlotV2
 
 }
 
- export function handlePositionSettled(event: EventLog1,positionSlotV2: PositionSlotV2): void{
-// let positionSettled=new PositionSettled(`${event.transaction.hash}_${event.logIndex}`)
+ export function handlePositionSettled(event: EventLog1,positionSlotV2: PositionSlotV2,data: EventData): void{
+let positionSettled=new PositionSettledV2(`${event.transaction.hash}_${event.logIndex}`)
+
+
+positionSettled.account=positionSlotV2.account
+positionSettled.collateralToken=positionSlotV2.collateralToken
+positionSettled.marketToken=positionSlotV2.marketToken
+positionSettled.indexToken=positionSlotV2.indexToken
+positionSettled.longToken=positionSlotV2.longToken
+positionSettled.shortToken=positionSlotV2.shortToken
+positionSettled.isLong=positionSlotV2.isLong
+positionSettled.key=positionSlotV2.key
+positionSettled.cumulativeCollateral=positionSlotV2.cumulativeCollateral
+positionSettled.cumulativeFee=positionSlotV2.cumulativeFee
+positionSettled.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken
+positionSettled.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd
+positionSettled.maxSize=positionSlotV2.maxSize
+positionSettled.maxCollateral=positionSlotV2.maxCollateral
+positionSettled.blockNumber=event.block.number
+positionSettled.blockTimestamp=event.block.timestamp
+positionSettled.lastIncreasedTimestamp=positionSlotV2.lastIncreasedTimestamp
+positionSettled.lastDecreasedTimestamp=positionSlotV2.lastDecreasedTimestamp
+positionSettled.numberOfIncrease=positionSlotV2.numberOfIncrease
+positionSettled.numberOfDecrease=positionSlotV2.numberOfDecrease
+positionSettled.lastDecreasedIndexTokenPriceMin=positionSlotV2.lastDecreasedIndexTokenPriceMin
+positionSettled.lastDecreasedIndexTokenPriceMax=positionSlotV2.lastDecreasedIndexTokenPriceMax
+positionSettled.lastIncreasedIndexTokenPriceMin=positionSlotV2.lastIncreasedIndexTokenPriceMin
+positionSettled.lastIncreasedIndexTokenPriceMax=positionSlotV2.lastIncreasedIndexTokenPriceMax
+positionSettled.lastIncreasedCollateralTokenPriceMin=positionSlotV2.lastIncreasedCollateralTokenPriceMin
+positionSettled.lastIncreasedCollateralTokenPriceMax=positionSlotV2.lastIncreasedCollateralTokenPriceMax
+positionSettled.lastDecreasedCollateralTokenPriceMin=positionSlotV2.lastDecreasedCollateralTokenPriceMin
+positionSettled.lastDecreasedCollateralTokenPriceMax=positionSlotV2.lastDecreasedCollateralTokenPriceMax
+positionSettled.priceImpactUsd=positionSlotV2.priceImpactUsd
+positionSettled.basePnlUsd=positionSlotV2.basePnlUsd
+positionSettled.uncappedBasePnlUsd=positionSlotV2.uncappedBasePnlUsd
+positionSettled.indexTokenPriceMax=positionSlotV2.indexTokenPriceMax
+positionSettled.indexTokenPriceMin=positionSlotV2.indexTokenPriceMin
+positionSettled.collateralTokenPriceMax=positionSlotV2.collateralTokenPriceMax
+positionSettled.collateralTokenPriceMin=positionSlotV2.collateralTokenPriceMin
+positionSettled.indexTokenOpenPriceMin=positionSlotV2.indexTokenOpenPriceMin
+positionSettled.indexTokenOpenPriceMax=positionSlotV2.indexTokenOpenPriceMax
+positionSettled.sizeUpdatedAt=positionSlotV2.sizeUpdatedAt
+positionSettled.fundingFeeUsd=positionSlotV2.fundingFeeUsd
+positionSettled.positionFeeUsd=positionSlotV2.positionFeeUsd
+positionSettled.borrowingFeeUsd=positionSlotV2.borrowingFeeUsd
+positionSettled.feesUpdatedAt=positionSlotV2.feesUpdatedAt
+positionSettled.save()
 return
 
 }

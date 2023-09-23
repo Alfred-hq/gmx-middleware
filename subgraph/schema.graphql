@@ -745,33 +745,33 @@ type DecreasePositionV2 @entity(immutable: true) {
   sizeInUsd:BigInt!
   sizeInToken:BigInt!
   isLong: Boolean! # bool
-  acceptablePrice: BigInt! # uint256
-  executionPrice: BigInt! # uint256 //new
-  indexTokenPriceMax: BigInt! #new
-  indexTokenPriceMin: BigInt! #new
-  collateralTokenPriceMin: BigInt! #new
-  collateralTokenPriceMax: BigInt! #new
-  executionFee: BigInt! # uint256
+  acceptablePrice: BigInt # uint256
+  executionPrice: BigInt # uint256 //new
+  indexTokenPriceMax: BigInt #new
+  indexTokenPriceMin: BigInt #new
+  collateralTokenPriceMin: BigInt #new
+  collateralTokenPriceMax: BigInt #new
+  executionFee: BigInt # uint256
   # blockGap: BigInt! # uint256
   # timeGap: BigInt! # uint256  
 
 
-  priceImpactUsd: BigInt!
-  basePnlUsd: BigInt!
-  uncappedBasePnlUsd:BigInt!
+  priceImpactUsd: BigInt
+  basePnlUsd: BigInt
+  uncappedBasePnlUsd:BigInt
 
-  blockNumber: BigInt!
-  blockTimestamp: BigInt!
-  transactionHash: String!
-  transactionIndex: BigInt!
-  logIndex: BigInt!
-  eventType: String! # close or decrease
+  blockNumber: BigInt
+  blockTimestamp: BigInt
+  transactionHash: String
+  transactionIndex: BigInt
+  logIndex: BigInt
+  eventType: String # close or decrease
 }
 
-type PositionSlotV2 @entity(immutable: true) {
+type PositionSlotV2 @entity {
   #basic info for position
   id: String!
-  idCount: Int!
+  # idCount: Int!
   # link: PositionLink
   account: String!
   collateralToken: String!
@@ -788,14 +788,13 @@ type PositionSlotV2 @entity(immutable: true) {
   # entryFundingRate: BigInt!
   # reserveAmount: BigInt!
   # realisedPnl: BigInt!
-
-  # cumulativeSize: BigInt!
-  # cumulativeCollateral: BigInt!
-  sizeInUsd: BigInt!
-  sizeInToken: BigInt!
-  collateralInUsd: BigInt! #collateralAmount
   cumulativeFee: BigInt!
-
+  cumulativeSizeInUsd: BigInt!
+  cumulativeSizeInToken: BigInt! #cumulative
+  cumulativeCollateral: BigInt!
+  collateralInUsd:BigInt!
+  sizeInToken:BigInt!
+  sizeInUsd:BigInt!
   maxSize: BigInt!
   maxCollateral: BigInt!
   blockNumber: BigInt!
@@ -838,7 +837,7 @@ type PositionSlotV2 @entity(immutable: true) {
 type PositionSettledV2 @entity(immutable: true) {
   #basic info for position
   id: String!
-  idCount: Int!
+  # idCount: Int!
   # link: PositionLink!
   account: String!
   collateralToken: String!
@@ -856,12 +855,14 @@ type PositionSettledV2 @entity(immutable: true) {
   # reserveAmount: BigInt!
   # realisedPnl: BigInt!
 
-  # cumulativeSize: BigInt!
-  # cumulativeCollateral: BigInt!
+  cumulativeSizeInUsd: BigInt!
+  cumulativeSizeInToken: BigInt! #cumulative
+  cumulativeCollateral: BigInt!
+  cumulativeFee: BigInt!
   sizeInUsd: BigInt!
   sizeInToken: BigInt!
   collateralInUsd: BigInt! #collateralAmount
-  cumulativeFee: BigInt!
+  
 
   maxSize: BigInt!
   maxCollateral: BigInt!
@@ -882,23 +883,23 @@ type PositionSettledV2 @entity(immutable: true) {
 
 
   #v2 specific Data
-  priceImpactUsd: BigInt!
-  basePnlUsd: BigInt!
-  uncappedBasePnlUsd:BigInt!
-  indexTokenPriceMax: BigInt!
-  indexTokenPriceMin: BigInt!
-  collateralTokenPriceMax: BigInt!
-  collateralTokenPriceMin:BigInt!
-  indexTokenOpenPriceMin: BigInt!
-  indexTokenOpenPriceMax: BigInt!
-  sizeUpdatedAt: BigInt!
+  priceImpactUsd: BigInt
+  basePnlUsd: BigInt
+  uncappedBasePnlUsd:BigInt
+  indexTokenPriceMax: BigInt
+  indexTokenPriceMin: BigInt
+  collateralTokenPriceMax: BigInt
+  collateralTokenPriceMin:BigInt
+  indexTokenOpenPriceMin: BigInt
+  indexTokenOpenPriceMax: BigInt
+  sizeUpdatedAt: BigInt
 
 
   #fee related Data
-  fundingFeeUsd: BigInt!
-  positionFeeUsd: BigInt!
-  borrowingFeeUsd: BigInt!
-  feesUpdatedAt: BigInt!
+  fundingFeeUsd: BigInt
+  positionFeeUsd: BigInt
+  borrowingFeeUsd: BigInt
+  feesUpdatedAt: BigInt
   
 
 }

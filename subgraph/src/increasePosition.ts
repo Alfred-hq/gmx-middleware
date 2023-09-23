@@ -2,7 +2,7 @@ import { EventLog1 } from "../generated/EventEmitter/EventEmitter";
 import { EventData } from "./EventEmitter"
 import {IncreasePositionV2, PositionSlotV2} from "../generated/schema"
 import { getMarketData, _resetPositionSlotV2 } from "./common";
-import { Address, BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, log } from "@graphprotocol/graph-ts";
 import { ADDRESS_ZERO, ZERO_BI } from "./const";
 // event.params.eventData.uintItems[0] == sizeinusd
 // increase event data type with index and key
@@ -38,9 +38,13 @@ import { ADDRESS_ZERO, ZERO_BI } from "./const";
 
 export function handleIncreasePositionEventV2(event: EventLog1,data: EventData):void{
     let eventType="Increase";
-    if(event.params.eventData.uintItems[0] === event.params.eventData.uintItems[12]){
+    const sizeInUsd=data.getUintItem("sizeInUsd")
+    const sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
+    if(sizeInUsd && sizeDeltaUsd && sizeInUsd.equals(sizeDeltaUsd)){
+        log.error("handle increase called ",[])
         eventType="Open"
     }
+    log.error("handle increase called ",[])
     handleIncreasePosition(event,data,eventType)
     return
 }
@@ -53,12 +57,17 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     return
     }
     const positionKey=keyBytes32.toHexString()
+    log.error("position key increase position {}",[positionKey])
     // init slot
     let positionSlotV2=PositionSlotV2.load(positionKey)
     if ( positionSlotV2 === null) {
     account=data.getAddressItemString("account");
+    log.error("position key account {}",[account?account:ADDRESS_ZERO])
     collateralToken=data.getAddressItemString("collateralToken")
-    marketToken=data.getAddressItemString("marketToken")
+    log.error("position key collateralToken {}",[collateralToken?collateralToken:ADDRESS_ZERO])
+    marketToken=data.getAddressItemString("market")
+    log.error("position key market {}",[marketToken?marketToken:ADDRESS_ZERO])
+
     isLong=data.getBoolItem("isLong");
     
 
@@ -72,6 +81,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
 
         // to get long short and index token
         const marketData=getMarketData(marketToken)
+        log.error("position key marketDataResponse succefull {}",[marketData[0]])
         if(marketData){
             indexToken=marketData[0]
             longToken=marketData[1]
@@ -80,6 +90,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         if(indexToken && longToken && shortToken){
             positionSlotV2.indexToken=indexToken
             positionSlotV2.longToken=longToken
+            positionSlotV2.shortToken=shortToken
         }
         _resetPositionSlotV2(positionSlotV2)
 
@@ -96,10 +107,10 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         positionSlotV2.cumulativeFee=BigInt.fromString('0')
     
         collateralInUsd=data.getUintItem("collateralAmount")
-        sizeInToken=data.getUintItem("sizeInToken")
-        sizeInUsd=data.getUintItem("sizeInUsd")
-        // sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
-        // sizeDeltaInTokens=data.getUintItem("sizeDeltaInTokens")
+        sizeInToken=data.getUintItem("sizeInTokens")
+        sizeInUsd=data.getUintItem("sizeInUsd")        
+        const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
+        const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens")    
         positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
         positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0")
         positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0")
@@ -112,16 +123,21 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         positionSlotV2.lastDecreasedTimestamp=BigInt.fromString("0")
         positionSlotV2.blockNumber=event.block.number
         positionSlotV2.blockTimestamp=event.block.timestamp 
+        positionSlotV2.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd.plus(returnValueOrZero(sizeDeltaInUsd))
+        positionSlotV2.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken.plus(returnValueOrZero(sizeDeltaInToken))
+        positionSlotV2.save()
       }
   }
   else{
     collateralInUsd=data.getUintItem("collateralAmount")
     sizeInToken=data.getUintItem("sizeInToken")
     sizeInUsd=data.getUintItem("sizeInUsd")
-    indexTokenPriceMax=data.getUintItem("indexTokenPriceMax")
-    indexTokenPriceMin=data.getUintItem("indexTokenPriceMin")
-    collateralTokenPriceMax=data.getUintItem("collateralTokenPriceMax")
-    collateralTokenPriceMin=data.getUintItem("collateralTokenPriceMin")
+    indexTokenPriceMax=data.getUintItem("indexTokenPrice.max")
+    indexTokenPriceMin=data.getUintItem("indexTokenPrice.min")
+    collateralTokenPriceMax=data.getUintItem("collateralTokenPrice.max")
+    collateralTokenPriceMin=data.getUintItem("collateralTokenPrice.min")
+    const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
+    const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens") 
     // sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
     // sizeDeltaInTokens=data.getUintItem("sizeDeltaInTokens")
     positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
@@ -137,6 +153,8 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     positionSlotV2.lastIncreasedIndexTokenPriceMax = returnValueOrZero(indexTokenPriceMax)
     positionSlotV2.lastIncreasedCollateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
     positionSlotV2.lastIncreasedCollateralTokenPriceMin=returnValueOrZero(collateralTokenPriceMin)
+    positionSlotV2.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd.plus(returnValueOrZero(sizeDeltaInUsd))
+    positionSlotV2.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken.plus(returnValueOrZero(sizeDeltaInToken))
   }
     positionSlotV2.save()
   let increasePositionData= IncreasePositionV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.toString()}`)
