@@ -11,7 +11,7 @@ import {
   TraderAnalyticsDaily,
   Trades,
 } from "../generated/schema";
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { ZERO_BI } from "./const";
 
 export function handleIncreaseTraderAnalytics(
@@ -119,7 +119,12 @@ export function handleClosePositionTraderAnalytics(
     event.params.realisedPnl
   );
 
-  const positionSettledTable = PositionSettled.load(event.params.key.toHexString());
+  const positionSettledTable = PositionSettled.load(
+    Bytes.fromUTF8("PositionSettled")
+      .concat(event.transaction.hash.concatI32(event.logIndex.toI32()))
+      .toHexString()
+  );
+
   if (positionSettledTable) {
     const netPnl = positionSettledTable.realisedPnl.minus(
       positionSettledTable.cumulativeFee
