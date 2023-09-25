@@ -7,7 +7,7 @@ import {
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
 import {
-  PositionSlot,
+  PositionSettled,
   TraderAnalyticsDaily,
   Trades,
 } from "../generated/schema";
@@ -119,10 +119,10 @@ export function handleClosePositionTraderAnalytics(
     event.params.realisedPnl
   );
 
-  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
-  if (positionSlotTable) {
-    const netPnl = positionSlotTable.realisedPnl.minus(
-      positionSlotTable.cumulativeFee
+  const positionSettledTable = PositionSettled.load(event.params.key.toHexString());
+  if (positionSettledTable) {
+    const netPnl = positionSettledTable.realisedPnl.minus(
+      positionSettledTable.cumulativeFee
     );
     dayPeriodData.winCountWithFee = netPnl.gt(BigInt.fromString("0"))
       ? dayPeriodData.winCountWithFee.plus(BigInt.fromString("1"))
@@ -130,12 +130,12 @@ export function handleClosePositionTraderAnalytics(
     dayPeriodData.loseCountWithFee = netPnl.le(BigInt.fromString("0"))
       ? dayPeriodData.loseCountWithFee.plus(BigInt.fromString("1"))
       : dayPeriodData.loseCountWithFee;
-    dayPeriodData.winCount = positionSlotTable.realisedPnl.gt(
+    dayPeriodData.winCount = positionSettledTable.realisedPnl.gt(
       BigInt.fromString("0")
     )
       ? dayPeriodData.winCount.plus(BigInt.fromString("1"))
       : dayPeriodData.winCount;
-    dayPeriodData.loseCount = positionSlotTable.realisedPnl.le(
+    dayPeriodData.loseCount = positionSettledTable.realisedPnl.le(
       BigInt.fromString("0")
     )
       ? dayPeriodData.loseCount.plus(BigInt.fromString("1"))
