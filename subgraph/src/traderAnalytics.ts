@@ -1,11 +1,4 @@
-import {
-  TraderAnalytics,
-  UpdatePosition,
-  IncreasePosition,
-  PositionSlot,
-  DecreasePosition,
-  Trades,
-} from "../generated/schema";
+import { TraderAnalytics, Trades, PositionSettled } from "../generated/schema";
 import {
   ClosePosition as ClosePositionEvent,
   DecreasePosition as DecreasePositionEvent,
@@ -13,7 +6,7 @@ import {
   LiquidatePosition as LiquidatePositionEvent,
   UpdatePosition as UpdatePositionEvent,
 } from "../generated/Vault/Vault";
-import { BigInt } from "@graphprotocol/graph-ts";
+import { BigInt, Bytes } from "@graphprotocol/graph-ts";
 import { ZERO_BI } from "./const";
 
 export function updateIncreaseTradeAnalytics(
@@ -85,12 +78,17 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
   if (!tradesTable) return;
   if (tradesTable.account === null) return;
 
-  const positionSlotTable = PositionSlot.load(event.params.key.toHexString());
+  // Fetching realised pnl from position settled
+  const positionSettled = PositionSettled.load(
+    Bytes.fromUTF8("PositionSettled")
+      .concat(event.transaction.hash.concatI32(event.logIndex.toI32()))
+      .toHexString()
+  );
 
-  if (positionSlotTable === null) return;
+  if (positionSettled === null) return;
 
-  const netPnl = positionSlotTable.realisedPnl.minus(
-    positionSlotTable.cumulativeFee
+  const netPnl = positionSettled.realisedPnl.minus(
+    positionSettled.cumulativeFee
   );
 
   const trades = initializeAnalyticsEntity(tradesTable.account);
@@ -107,10 +105,10 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
   trades.loseCountWithFee = netPnl.le(BigInt.fromString("0"))
     ? trades.loseCountWithFee.plus(BigInt.fromString("1"))
     : trades.loseCountWithFee;
-  trades.winCount = positionSlotTable.realisedPnl.gt(BigInt.fromString("0"))
+  trades.winCount = positionSettled.realisedPnl.gt(BigInt.fromString("0"))
     ? trades.winCount.plus(BigInt.fromString("1"))
     : trades.winCount;
-  trades.loseCount = positionSlotTable.realisedPnl.le(BigInt.fromString("0"))
+  trades.loseCount = positionSettled.realisedPnl.le(BigInt.fromString("0"))
     ? trades.loseCount.plus(BigInt.fromString("1"))
     : trades.loseCount;
 
