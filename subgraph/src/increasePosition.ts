@@ -1,9 +1,11 @@
 import { EventLog1 } from "../generated/EventEmitter/EventEmitter";
 import { EventData } from "./EventEmitter"
-import {IncreasePositionV2, PositionSlotV2} from "../generated/schema"
-import { getMarketData, _resetPositionSlotV2 } from "./common";
-import { BigInt, log } from "@graphprotocol/graph-ts";
+import {feeV2, IncreasePositionV2, PositionSlotV2, TradesV2} from "../generated/schema"
+import { getMarketData, getPositionLinkId, returnAddressOrZeroAddress, _resetPositionSlotV2 } from "./common";
+import { BigInt } from "@graphprotocol/graph-ts";
 import { ADDRESS_ZERO, ZERO_BI } from "./const";
+import { updateIncreaseTradeAnalyticsV2 } from "./traderAnalyticsV2";
+import { updateIncreaseTradeAnalyticsV2Daily } from "./traderAnalyticsV2WithInterval";
 // event.params.eventData.uintItems[0] == sizeinusd
 // increase event data type with index and key
 // 1. addressItems
@@ -41,201 +43,114 @@ export function handleIncreasePositionEventV2(event: EventLog1,data: EventData):
     const sizeInUsd=data.getUintItem("sizeInUsd")
     const sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
     if(sizeInUsd && sizeDeltaUsd && sizeInUsd.equals(sizeDeltaUsd)){
-        log.error("handle increase called ",[])
         eventType="Open"
     }
-    log.error("handle increase called ",[])
     handleIncreasePosition(event,data,eventType)
     return
 }
 
 export function handleIncreasePosition(event: EventLog1,data: EventData,eventType: string): void{
     const keyBytes32 = data.getBytes32Item("positionKey");
-    let account:string | null=ADDRESS_ZERO,collateralToken:string | null=ADDRESS_ZERO,indexToken:string | null=ADDRESS_ZERO,isLong=false,marketToken:string | null=ADDRESS_ZERO,longToken:string | null=ADDRESS_ZERO,shortToken:string | null=ADDRESS_ZERO,collateralInUsd: BigInt | null=ZERO_BI,sizeInToken: BigInt | null=ZERO_BI,sizeInUsd: BigInt | null=ZERO_BI,
-    indexTokenPriceMax: BigInt | null=ZERO_BI,indexTokenPriceMin: BigInt | null=ZERO_BI,collateralTokenPriceMax: BigInt | null=ZERO_BI,collateralTokenPriceMin: BigInt | null=ZERO_BI;
     if(!keyBytes32){
     return
     }
+    const feeData=feeV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.minus(BigInt.fromString("1"))}`); 
     const positionKey=keyBytes32.toHexString()
-    log.error("position key increase position {}",[positionKey])
     // init slot
-    let positionSlotV2=PositionSlotV2.load(positionKey)
-    if ( positionSlotV2 === null) {
-    account=data.getAddressItemString("account");
-    log.error("position key account {}",[account?account:ADDRESS_ZERO])
-    collateralToken=data.getAddressItemString("collateralToken")
-    log.error("position key collateralToken {}",[collateralToken?collateralToken:ADDRESS_ZERO])
-    marketToken=data.getAddressItemString("market")
-    log.error("position key market {}",[marketToken?marketToken:ADDRESS_ZERO])
-
-    isLong=data.getBoolItem("isLong");
-    
-
-    if(account &&  collateralToken && marketToken){
-        positionSlotV2 = new PositionSlotV2(positionKey)
-        positionSlotV2.account = account
-        positionSlotV2.collateralToken =collateralToken
-        positionSlotV2.marketToken = marketToken
-        positionSlotV2.isLong = isLong
-        positionSlotV2.key = positionKey
-
-        // to get long short and index token
-        const marketData=getMarketData(marketToken)
-        log.error("position key marketDataResponse succefull {}",[marketData[0]])
-        if(marketData){
-            indexToken=marketData[0]
-            longToken=marketData[1]
-            shortToken=marketData[2]
-        }
-        if(indexToken && longToken && shortToken){
-            positionSlotV2.indexToken=indexToken
-            positionSlotV2.longToken=longToken
-            positionSlotV2.shortToken=shortToken
-        }
-        _resetPositionSlotV2(positionSlotV2)
-
+    let positionSlotV2=createOrLoadPositionSlot(positionKey,data)
+    if(eventType == 'Open'){
+        positionSlotV2.idCount=positionSlotV2.idCount.plus(BigInt.fromString("1"))
+        positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),positionKey)
     }
-    else{
-        return 
-    }
-    if(positionSlotV2){
-        positionSlotV2.basePnlUsd=BigInt.fromString('0')
-        positionSlotV2.positionFeeUsd=BigInt.fromString('0')
-        positionSlotV2.borrowingFeeUsd=BigInt.fromString('0')
-        positionSlotV2.fundingFeeUsd=BigInt.fromString('0')
-        positionSlotV2.uncappedBasePnlUsd=BigInt.fromString('0')
-        positionSlotV2.cumulativeFee=BigInt.fromString('0')
-    
-        collateralInUsd=data.getUintItem("collateralAmount")
-        sizeInToken=data.getUintItem("sizeInTokens")
-        sizeInUsd=data.getUintItem("sizeInUsd")        
-        const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
-        const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens")    
-        positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
-        positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0")
-        positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0")
-        positionSlotV2.maxSize=sizeInUsd?sizeInUsd:BigInt.fromString("0")
-        positionSlotV2.maxCollateral=collateralInUsd? collateralInUsd:BigInt.fromString("0")
-        positionSlotV2.numberOfIncrease=BigInt.fromString("1")
-        positionSlotV2.numberOfDecrease=BigInt.fromString("0")
-        // positionSlotV2.lastDecreasedPrice=BigInt.fromString("0");
-        positionSlotV2.lastIncreasedTimestamp=event.block.timestamp
-        positionSlotV2.lastDecreasedTimestamp=BigInt.fromString("0")
-        positionSlotV2.blockNumber=event.block.number
-        positionSlotV2.blockTimestamp=event.block.timestamp 
-        positionSlotV2.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd.plus(returnValueOrZero(sizeDeltaInUsd))
-        positionSlotV2.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken.plus(returnValueOrZero(sizeDeltaInToken))
-        positionSlotV2.save()
-      }
-  }
-  else{
-    collateralInUsd=data.getUintItem("collateralAmount")
-    sizeInToken=data.getUintItem("sizeInToken")
-    sizeInUsd=data.getUintItem("sizeInUsd")
-    indexTokenPriceMax=data.getUintItem("indexTokenPrice.max")
-    indexTokenPriceMin=data.getUintItem("indexTokenPrice.min")
-    collateralTokenPriceMax=data.getUintItem("collateralTokenPrice.max")
-    collateralTokenPriceMin=data.getUintItem("collateralTokenPrice.min")
-    const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
-    const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens") 
-    // sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
-    // sizeDeltaInTokens=data.getUintItem("sizeDeltaInTokens")
-    positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
-    positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0")
-    positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0")
-    positionSlotV2.maxSize=positionSlotV2.maxCollateral.gt(sizeInUsd?sizeInUsd:BigInt.fromString("0")) ? positionSlotV2.maxSize : sizeInUsd?sizeInUsd:BigInt.fromString("0")
-    positionSlotV2.maxCollateral=positionSlotV2.maxCollateral.gt(collateralInUsd?collateralInUsd:BigInt.fromString("0")) ? positionSlotV2.maxCollateral : collateralInUsd?collateralInUsd:BigInt.fromString("0")
+    const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount"))
+    const sizeInToken=returnValueOrZero(data.getUintItem("sizeInToken"))
+    const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
+    const indexTokenPriceMax=returnValueOrZero(data.getUintItem("indexTokenPrice.max"))
+    const indexTokenPriceMin=returnValueOrZero(data.getUintItem("indexTokenPrice.min"))
+    const collateralTokenPriceMax=returnValueOrZero(data.getUintItem("collateralTokenPrice.max"))
+    const collateralTokenPriceMin=returnValueOrZero(data.getUintItem("collateralTokenPrice.min"))
+    const sizeDeltaInUsd=returnValueOrZero(data.getUintItem("sizeDeltaUsd"))
+    const sizeDeltaInToken=returnValueOrZero(data.getUintItem("sizeDeltaInTokens"))
+    const collateralDeltaUsd=returnValueOrZero(data.getIntItem("collateralDeltaAmount"))
+    const collateralUsd=returnValueOrZero(data.getUintItem("collateralAmount"))
+    const orderKey=data.getBytes32Item("orderKey")
+    const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
+      
+    positionSlotV2.collateralInUsd=collateralInUsd
+    positionSlotV2.sizeInToken=sizeInToken
+    positionSlotV2.sizeInUsd=sizeInUsd
+    positionSlotV2.maxSize=positionSlotV2.maxCollateral.gt(sizeInUsd) ? positionSlotV2.maxSize : sizeInUsd
+    positionSlotV2.maxCollateral=positionSlotV2.maxCollateral.gt(collateralInUsd) ? positionSlotV2.maxCollateral : collateralInUsd
     positionSlotV2.numberOfIncrease=positionSlotV2.numberOfIncrease.plus(BigInt.fromString('1'))
     positionSlotV2.lastIncreasedTimestamp=event.block.timestamp
 
     // price data 
-    positionSlotV2.lastIncreasedIndexTokenPriceMin=returnValueOrZero(indexTokenPriceMin)
-    positionSlotV2.lastIncreasedIndexTokenPriceMax = returnValueOrZero(indexTokenPriceMax)
-    positionSlotV2.lastIncreasedCollateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
-    positionSlotV2.lastIncreasedCollateralTokenPriceMin=returnValueOrZero(collateralTokenPriceMin)
-    positionSlotV2.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd.plus(returnValueOrZero(sizeDeltaInUsd))
-    positionSlotV2.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken.plus(returnValueOrZero(sizeDeltaInToken))
-  }
+    positionSlotV2.lastIncreasedIndexTokenPriceMin = indexTokenPriceMin
+    positionSlotV2.lastIncreasedIndexTokenPriceMax = indexTokenPriceMax
+    positionSlotV2.lastIncreasedCollateralTokenPriceMax = collateralTokenPriceMax
+    positionSlotV2.lastIncreasedCollateralTokenPriceMin = collateralTokenPriceMin
+    positionSlotV2.cumulativeSizeInUsd=positionSlotV2.cumulativeSizeInUsd.plus(sizeDeltaInUsd)
+    positionSlotV2.cumulativeSizeInToken=positionSlotV2.cumulativeSizeInToken.plus(sizeDeltaInToken)
+    positionSlotV2.cumulativeCollateral=positionSlotV2.cumulativeCollateral.plus(collateralDeltaUsd)
+    if(feeData){
+    positionSlotV2.fundingFeeAmount=positionSlotV2.fundingFeeAmount.plus(feeData.fundingFeeAmount)
+    positionSlotV2.positionFeeAmount=positionSlotV2.positionFeeAmount.plus(feeData.positionFeeAmount)
+    positionSlotV2.borrowingFeeAmount=positionSlotV2.borrowingFeeAmount.plus(feeData.borrowingFeeAmount)
+    positionSlotV2.uiFeeAmount=positionSlotV2.uiFeeAmount.plus(feeData.uiFeeAmount)
+    positionSlotV2.traderDiscountAmount=positionSlotV2.traderDiscountAmount.plus(feeData.traderDiscountAmount)
+    positionSlotV2.totalFeeAmount=positionSlotV2.totalFeeAmount.plus(feeData.totalCostAmount)
+    positionSlotV2.feesUpdatedAt=event.block.timestamp
+    }  
+  
     positionSlotV2.save()
   let increasePositionData= IncreasePositionV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.toString()}`)
+
   if(!increasePositionData){
       increasePositionData=new IncreasePositionV2(`${event.transaction.hash.toHexString()}_${event.logIndex.toString()}`)
   }
-  const collateralDeltaUsd=data.getUintItem("collateralAmount"),
-  sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd"),
-  sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens"),
-  orderKey=data.getBytes32Item("orderKey"),
-  executionPrice=data.getUintItem("executionPrice") 
+
+  
     increasePositionData.positionKey=positionKey
     increasePositionData.orderKey=orderKey?orderKey.toHexString():ADDRESS_ZERO
-    // increasePositionData.orderTyp
-    increasePositionData.account=account?account:ADDRESS_ZERO
-    // increasePositionData.path
+    increasePositionData.account=positionSlotV2.account
     increasePositionData.indexToken=positionSlotV2.indexToken
-    increasePositionData.marketToekn=positionSlotV2.marketToken
+    increasePositionData.marketToken=positionSlotV2.marketToken
     increasePositionData.collateralToken=positionSlotV2.collateralToken
-    increasePositionData.collateralInUsd=returnValueOrZero(collateralDeltaUsd)
-    increasePositionData.sizeDeltaInUsd=returnValueOrZero(sizeDeltaInUsd)
-    increasePositionData.sizeDeltaInToken=returnValueOrZero(sizeDeltaInToken)
-    increasePositionData.sizeInUsd=returnValueOrZero(sizeInUsd)
-    increasePositionData.sizeInToken=returnValueOrZero(sizeInToken)
+    increasePositionData.collateralInUsd=collateralUsd
+    increasePositionData.sizeDeltaInUsd=sizeDeltaInUsd
+    increasePositionData.sizeDeltaInToken=sizeDeltaInToken
+    increasePositionData.sizeInUsd=sizeInUsd
+    increasePositionData.sizeInToken=sizeInToken
     increasePositionData.isLong=positionSlotV2.isLong
-    // increasePositionData.acceptablePrice
-    increasePositionData.executionPrice=returnValueOrZero(executionPrice)
-    increasePositionData.indexTokenPriceMax=returnValueOrZero(indexTokenPriceMax)
-    increasePositionData.indexTokenPriceMin=returnValueOrZero(indexTokenPriceMin)
-    increasePositionData.collateralTokenPriceMin=returnValueOrZero(collateralTokenPriceMin)
-    increasePositionData.collateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
-    // increasePositionData.executionFee=
-    // increasePositionData.blockGap
-    // increasePositionData.timeGap
+    increasePositionData.executionPrice=executionPrice
+    increasePositionData.indexTokenPriceMax=indexTokenPriceMax
+    increasePositionData.indexTokenPriceMin=indexTokenPriceMin
+    increasePositionData.collateralTokenPriceMin=collateralTokenPriceMin
+    increasePositionData.collateralTokenPriceMax=collateralTokenPriceMax
     increasePositionData.blockNumber=event.block.number
     increasePositionData.blockTimestamp=event.block.timestamp
     increasePositionData.transactionHash=event.transaction.hash.toHexString()
     increasePositionData.transactionIndex=event.transaction.index
     increasePositionData.logIndex=event.logIndex
+    increasePositionData.collateralDeltaUsd=collateralDeltaUsd
     increasePositionData.eventType=eventType.toString()
+    increasePositionData.linkId=positionSlotV2.linkId
+    if(feeData){
+        increasePositionData.fundingFeeAmount=feeData.fundingFeeAmount
+        increasePositionData.positionFeeAmount=feeData.positionFeeAmount
+        increasePositionData.borrowingFeeAmount=feeData.borrowingFeeAmount
+        increasePositionData.uiFeeAmount=feeData.uiFeeAmount
+        increasePositionData.traderDiscountAmount=feeData.traderDiscountAmount
+        increasePositionData.totalFeeAmount=feeData.totalCostAmount
+        increasePositionData.feesUpdatedAt=event.block.timestamp  
+    }
     increasePositionData.save()
+    updateDecreaseTradeData(increasePositionData ,event )
+    updateIncreaseTradeAnalyticsV2(event,data,eventType,keyBytes32.toHexString())
+    updateIncreaseTradeAnalyticsV2Daily(event,data,eventType,keyBytes32.toHexString())
     return
 }
-// export function handleIncreasePosition(event: EventLog1,data: EventData){
-//     let eventType="increase"
-//     let keyBytes32 = data.getBytes32Item("positionKey");
-//     if(!keyBytes32){
-//     return
-//     }
-//     let positionKey=keyBytes32.toHexString();
-//     let positionSlotV2=PositionSlotV2.load(positionKey)
-//     if ( positionSlotV2 === null) {
-//         return
-//     }
-//     let collateralInUsd,sizeInToken,sizeInUsd,indexTokenPriceMin,indexTokenPriceMax,collateralTokenPriceMin,collateralTokenPriceMax;
-//     collateralInUsd=data.getUintItem("collateralAmount")
-//     sizeInToken=data.getUintItem("sizeInToken")
-//     sizeInUsd=data.getUintItem("sizeInUsd")
-//     indexTokenPriceMax=data.getUintItem("indexTokenPriceMax")
-//     indexTokenPriceMin=data.getUintItem("indexTokenPriceMin")
-//     collateralTokenPriceMax=data.getUintItem("collateralTokenPriceMax")
-//     collateralTokenPriceMin=data.getUintItem("collateralTokenPriceMin")
-//     // sizeDeltaUsd=data.getUintItem("sizeDeltaUsd")
-//     // sizeDeltaInTokens=data.getUintItem("sizeDeltaInTokens")
-//     positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0");
-//     positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0");
-//     positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0");
-//     positionSlotV2.maxSize=positionSlotV2.maxCollateral.gt(sizeInUsd?sizeInUsd:BigInt.fromString("0")) ? positionSlotV2.maxSize : sizeInUsd?sizeInUsd:BigInt.fromString("0")
-//     positionSlotV2.maxCollateral=positionSlotV2.maxCollateral.gt(collateralInUsd?collateralInUsd:BigInt.fromString("0")) ? positionSlotV2.maxCollateral : collateralInUsd?collateralInUsd:BigInt.fromString("0")
-//     positionSlotV2.numberOfIncrease=positionSlotV2.numberOfIncrease.plus(BigInt.fromString('1'))
-//     positionSlotV2.lastIncreasedTimestamp=event.block.timestamp
 
-//     // price data 
-//     positionSlotV2.lastIncreasedIndexTokenPriceMin=returnValueOrZero(indexTokenPriceMin)
-//     positionSlotV2.lastIncreasedIndexTokenPriceMax = returnValueOrZero(indexTokenPriceMax)
-//     positionSlotV2.lastIncreasedCollateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
-//     positionSlotV2.lastIncreasedCollateralTokenPriceMin=returnValueOrZero(collateralTokenPriceMin)
-
-
-
-// }
 export function returnValueOrZero(value: BigInt | null): BigInt{
     if(value){
         return value
@@ -245,6 +160,84 @@ export function returnValueOrZero(value: BigInt | null): BigInt{
     }
 }
 
-// export function handleIncreaseData(event){
+export function createOrLoadPositionSlot(key: string, data : EventData): PositionSlotV2{
+    let positionSlotV2=PositionSlotV2.load(key)
+    if(positionSlotV2){
+        return positionSlotV2
+    }
+    positionSlotV2 = new PositionSlotV2(key)
 
-// }
+    const account=returnAddressOrZeroAddress(data.getAddressItemString("account"))
+    const collateralToken=returnAddressOrZeroAddress(data.getAddressItemString("collateralToken"))
+    const marketToken=returnAddressOrZeroAddress(data.getAddressItemString("market"))
+    const isLong=data.getBoolItem("isLong");
+    const marketData=getMarketData(marketToken)
+    let indexToken:string=ADDRESS_ZERO,longToken:string=ADDRESS_ZERO,shortToken=ADDRESS_ZERO
+    if(marketData){
+        indexToken=marketData[0]
+        longToken=marketData[1]
+        shortToken=marketData[2]
+    }
+    positionSlotV2.account = account
+    positionSlotV2.collateralToken =collateralToken
+    positionSlotV2.marketToken = marketToken
+    positionSlotV2.isLong = isLong
+    positionSlotV2.key = key
+    positionSlotV2.indexToken=indexToken
+    positionSlotV2.longToken=longToken
+    positionSlotV2.shortToken=shortToken
+    positionSlotV2.idCount=ZERO_BI
+    positionSlotV2.basePnlUsd=ZERO_BI
+    positionSlotV2.uncappedBasePnlUsd=ZERO_BI
+    positionSlotV2.idCount=ZERO_BI
+    positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),key)
+    _resetPositionSlotV2(positionSlotV2)
+    return positionSlotV2
+}
+
+export function updateDecreaseTradeData(entity : IncreasePositionV2 ,event: EventLog1): void{
+    const trade=new TradesV2(`${event.transaction.hash.toHexString()}_${event.logIndex}`)
+    
+    trade.positionKey=entity.positionKey
+    trade.orderKey=entity.orderKey
+    trade.account=entity.account
+    trade.indexToken=entity.indexToken
+    trade.marketToken=entity.marketToken
+    trade.collateralToken=entity.collateralToken
+  
+  
+  
+    trade.sizeDeltaInUsd=entity.sizeDeltaInUsd
+    trade.sizeDeltaInToken=entity.sizeDeltaInToken
+    trade.collateralInUsd=entity.collateralInUsd
+    trade.collateralDeltaUsd=entity.collateralDeltaUsd
+    trade.sizeInUsd=entity.sizeInUsd
+    trade.sizeInToken=entity.sizeInToken
+    trade.isLong=entity.isLong
+    // trade.acceptablePrice=entity.acceptablePrice
+    trade.executionPrice=entity.executionPrice
+    trade.indexTokenPriceMax=entity.indexTokenPriceMax
+    trade.indexTokenPriceMin=entity.indexTokenPriceMin
+    trade.collateralTokenPriceMin=entity.collateralTokenPriceMin
+    trade.collateralTokenPriceMax=entity.collateralTokenPriceMax
+    // trade.executionFee=entity.executionFee
+    trade.priceImpactUsd=entity.priceImpactUsd
+    trade.basePnlUsd=entity.basePnlUsd
+    trade.uncappedBasePnlUsd=entity.uncappedBasePnlUsd
+    trade.blockNumber=entity.blockNumber
+    trade.blockTimestamp=entity.blockTimestamp
+    trade.transactionHash=entity.transactionHash
+    trade.transactionIndex=entity.transactionIndex
+    trade.logIndex=entity.logIndex
+    trade.eventType=entity.eventType
+    trade.fundingFeeAmount=entity.fundingFeeAmount
+    trade.positionFeeAmount=entity.positionFeeAmount
+    trade.borrowingFeeAmount=entity.borrowingFeeAmount
+    trade.uiFeeAmount=entity.uiFeeAmount
+    trade.traderDiscountAmount=entity.traderDiscountAmount
+    trade.totalFeeAmount=entity.totalFeeAmount
+    trade.feesUpdatedAt=entity.feesUpdatedAt
+    trade.linkId=entity.linkId
+    trade.save()
+    return
+    }

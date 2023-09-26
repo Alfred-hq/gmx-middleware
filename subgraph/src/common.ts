@@ -1,7 +1,7 @@
 import { ADDRESS_ZERO, ZERO_BI } from "./const";
 import { PositionSlotV2 } from "../generated/schema";
 import * as gmxReader from "../generated/EventEmitter/Reader";
-import { Address, log } from "@graphprotocol/graph-ts";
+import { Address, Bytes, log } from "@graphprotocol/graph-ts";
 export function getMarketData(marketAddress: string): Array<string>{
     // add contract call to reader contract to get market data
     //for the current available market we can use constant file to reduce rpc calls
@@ -47,23 +47,36 @@ export function _resetPositionSlotV2(positionSlotV2: PositionSlotV2): PositionSl
     positionSlotV2.cumulativeSizeInToken=ZERO_BI
     positionSlotV2.cumulativeSizeInUsd=ZERO_BI
     positionSlotV2.cumulativeCollateral=ZERO_BI
-positionSlotV2.priceImpactUsd=ZERO_BI
-positionSlotV2.basePnlUsd=ZERO_BI
-positionSlotV2.uncappedBasePnlUsd=ZERO_BI
-positionSlotV2.indexTokenPriceMax=ZERO_BI
-positionSlotV2.indexTokenPriceMin=ZERO_BI
-positionSlotV2.collateralTokenPriceMax=ZERO_BI
-positionSlotV2.collateralTokenPriceMin=ZERO_BI
-positionSlotV2.indexTokenOpenPriceMin=ZERO_BI
-positionSlotV2.indexTokenOpenPriceMax=ZERO_BI
-positionSlotV2.sizeUpdatedAt=ZERO_BI
+    positionSlotV2.priceImpactUsd=ZERO_BI
+    positionSlotV2.basePnlUsd=ZERO_BI
+    positionSlotV2.uncappedBasePnlUsd=ZERO_BI
+    positionSlotV2.indexTokenPriceMax=ZERO_BI
+    positionSlotV2.indexTokenPriceMin=ZERO_BI
+    positionSlotV2.collateralTokenPriceMax=ZERO_BI
+    positionSlotV2.collateralTokenPriceMin=ZERO_BI
+    positionSlotV2.indexTokenOpenPriceMin=ZERO_BI
+    positionSlotV2.indexTokenOpenPriceMax=ZERO_BI
+    positionSlotV2.sizeUpdatedAt=ZERO_BI
 
 
- 
-positionSlotV2.fundingFeeUsd=ZERO_BI
-positionSlotV2.positionFeeUsd=ZERO_BI
-positionSlotV2.borrowingFeeUsd=ZERO_BI
-positionSlotV2.feesUpdatedAt=ZERO_BI
-positionSlotV2.save()
+    positionSlotV2.fundingFeeAmount=ZERO_BI
+    positionSlotV2.positionFeeAmount=ZERO_BI
+    positionSlotV2.borrowingFeeAmount=ZERO_BI
+    positionSlotV2.uiFeeAmount=ZERO_BI
+    positionSlotV2.traderDiscountAmount=ZERO_BI
+    positionSlotV2.totalFeeAmount=ZERO_BI
+    positionSlotV2.feesUpdatedAt=ZERO_BI
+    positionSlotV2.save()
 return positionSlotV2
   }
+
+export function returnAddressOrZeroAddress(value:string | null) : string{
+  if(value){
+    return value
+  }
+  return ADDRESS_ZERO
+}
+
+export const getPositionLinkId = (id: i32, key: string): string => {
+  return `PositionLink_${id.toString()}_${key}`
+};

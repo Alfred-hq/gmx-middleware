@@ -311,6 +311,7 @@ type PositionLink @entity(immutable: false) {
   size: BigInt!
   collateral: BigInt!
 }
+
 type CancelDecreaseOrder @entity(immutable: true) {
   id: String!
   account: String! # address
@@ -702,9 +703,10 @@ type IncreasePositionV2 @entity(immutable: true) {
   orderKey: String #orderKey for v2
   account: String! # address
   indexToken: String! # address
-  marketToekn: String! # address //new
+  marketToken: String! # address //new
   collateralToken: String! # address
   collateralInUsd: BigInt! # uint256 //collateral amount
+  collateralDeltaUsd: BigInt! # uint256 collateralDeltaUsd
   # minOut: BigInt! # uint256
   sizeDeltaInUsd: BigInt! # uint256
   sizeDeltaInToken: BigInt! # uint256
@@ -726,6 +728,18 @@ type IncreasePositionV2 @entity(immutable: true) {
   transactionIndex: BigInt!
   logIndex: BigInt!
   eventType:String! # String open or increase
+  fundingFeeAmount: BigInt!
+  positionFeeAmount: BigInt!
+  borrowingFeeAmount: BigInt!
+  uiFeeAmount:BigInt!
+  traderDiscountAmount:BigInt!
+  totalFeeAmount:BigInt!
+  feesUpdatedAt: BigInt!
+  priceImpactUsd: BigInt
+  basePnlUsd: BigInt
+  uncappedBasePnlUsd:BigInt
+
+  linkId:String
 }
 
 type DecreasePositionV2 @entity(immutable: true) {
@@ -742,10 +756,11 @@ type DecreasePositionV2 @entity(immutable: true) {
   # minOut: BigInt! # uint256
   sizeDeltaInUsd: BigInt! # uint256
   sizeDeltaInToken: BigInt! # uint256
+  collateralInUsd: BigInt! # uint256 //collateral amount
+  collateralDeltaUsd: BigInt! # uint256 collateralDeltaUsd
   sizeInUsd:BigInt!
   sizeInToken:BigInt!
   isLong: Boolean! # bool
-  acceptablePrice: BigInt # uint256
   executionPrice: BigInt # uint256 //new
   indexTokenPriceMax: BigInt #new
   indexTokenPriceMin: BigInt #new
@@ -766,13 +781,73 @@ type DecreasePositionV2 @entity(immutable: true) {
   transactionIndex: BigInt
   logIndex: BigInt
   eventType: String # close or decrease
+  fundingFeeAmount: BigInt!
+  positionFeeAmount: BigInt!
+  borrowingFeeAmount: BigInt!
+  uiFeeAmount:BigInt!
+  traderDiscountAmount:BigInt!
+  totalFeeAmount:BigInt!
+  feesUpdatedAt: BigInt!
+  linkId:String
+
 }
+
+type TradesV2 @entity(immutable: true) {
+  id: String!
+  positionKey: String! #position key 
+  orderKey: String #orderKey for v2
+  account: String! # address
+  indexToken: String! # address
+  marketToken: String! # address //new
+  collateralToken: String! # address
+
+
+  sizeDeltaInUsd: BigInt! # uint256
+  sizeDeltaInToken: BigInt! # uint256
+  collateralInUsd: BigInt! # uint256 //collateral amount
+  collateralDeltaUsd: BigInt! # uint256 collateralDeltaUsd
+  sizeInUsd:BigInt!
+  sizeInToken:BigInt!
+  isLong: Boolean! # bool
+  acceptablePrice: BigInt # uint256
+  executionPrice: BigInt # uint256 //new
+  indexTokenPriceMax: BigInt #new
+  indexTokenPriceMin: BigInt #new
+  collateralTokenPriceMin: BigInt #new
+  collateralTokenPriceMax: BigInt #new
+  executionFee: BigInt # uint256
+
+
+
+  priceImpactUsd: BigInt
+  basePnlUsd: BigInt
+  uncappedBasePnlUsd:BigInt
+
+  blockNumber: BigInt
+  blockTimestamp: BigInt
+  transactionHash: String
+  transactionIndex: BigInt
+  logIndex: BigInt
+  eventType: String # close or decrease
+  fundingFeeAmount: BigInt!
+  positionFeeAmount: BigInt!
+  borrowingFeeAmount: BigInt!
+  uiFeeAmount:BigInt!
+  traderDiscountAmount:BigInt!
+  totalFeeAmount:BigInt!
+  feesUpdatedAt: BigInt!
+  linkId:String
+
+}
+
 
 type PositionSlotV2 @entity {
   #basic info for position
   id: String!
-  # idCount: Int!
-  # link: PositionLink
+  idCount:BigInt!
+  linkId:String! #link id and id count will be updated when there is a new open position 
+
+
   account: String!
   collateralToken: String!
   marketToken: String! #market token is token of market which is used to get the index token and other token
@@ -827,18 +902,21 @@ type PositionSlotV2 @entity {
 
 
   #fee related Data
-  fundingFeeUsd: BigInt!
-  positionFeeUsd: BigInt!
-  borrowingFeeUsd: BigInt!
+  fundingFeeAmount: BigInt! #5 +
+  positionFeeAmount: BigInt! #1 +
+  borrowingFeeAmount: BigInt! #2 +
+  uiFeeAmount: BigInt! #3 + 
+  traderDiscountAmount: BigInt! #4  -
+  totalFeeAmount: BigInt!
   feesUpdatedAt: BigInt!
-  
 
 }
+
 type PositionSettledV2 @entity(immutable: true) {
   #basic info for position
   id: String!
-  # idCount: Int!
-  # link: PositionLink!
+  idCount:BigInt!
+  linkId:String! #link id and id count will be updated when there is a new open position 
   account: String!
   collateralToken: String!
   marketToken: String! #market token is token of market which is used to get the index token and other token
@@ -896,13 +974,60 @@ type PositionSettledV2 @entity(immutable: true) {
 
 
   #fee related Data
-  fundingFeeUsd: BigInt
-  positionFeeUsd: BigInt
-  borrowingFeeUsd: BigInt
-  feesUpdatedAt: BigInt
-  
-
+  fundingFeeAmount: BigInt!
+  positionFeeAmount: BigInt!
+  borrowingFeeAmount: BigInt!
+  uiFeeAmount:BigInt!
+  traderDiscountAmount:BigInt!
+  totalFeeAmount:BigInt!
+  feesUpdatedAt: BigInt!
 }
+
+
+type TraderAnalyticsV2 @entity {
+  id: String!
+  account: String!
+  cumulativeSize: BigInt!
+  cumulativeFee: BigInt!
+  cumulativeCollateral: BigInt!
+  maxSize: BigInt!
+  maxCollateral: BigInt!
+  cumulativePnl: BigInt!
+  openCount: BigInt!
+  totalPositions: BigInt!
+  increaseCount: BigInt!
+  decreaseCount: BigInt!
+  lastSettledPositionAt: BigInt!
+  lastOpenPositionAt: BigInt!
+  totalLiquidated: BigInt!
+  winCountWithFee: BigInt!
+  winCount: BigInt!
+  loseCountWithFee: BigInt!
+  loseCount: BigInt!
+}
+
+ type TraderAnalyticsV2Daily @entity {
+  id: String!
+  startTime: BigInt!
+  account: String!
+  cumulativeSize: BigInt!
+  cumulativeFee: BigInt!
+  cumulativeCollateral: BigInt!
+  maxSize: BigInt!
+  maxCollateral: BigInt!
+  cumulativePnl: BigInt!
+  openCount: BigInt!
+  totalPositions: BigInt!
+  increaseCount: BigInt!
+  decreaseCount: BigInt!
+  lastSettledPositionAt: BigInt!
+  lastOpenPositionAt: BigInt!
+  totalLiquidated: BigInt!
+  winCountWithFee: BigInt!
+  winCount: BigInt!
+  loseCountWithFee: BigInt!
+  loseCount: BigInt!
+ }
 # type PositionSettledV2 @entity(immutable: true){
 
 # }
@@ -979,6 +1104,52 @@ type PositionSettledV2 @entity(immutable: true) {
 #   priceImpactUsd: BigInt!
 # }
 
-# type feeV2 @entity(immutable: true){
+type feeV2 @entity(immutable: true){
+#id
+id: String!
 
-# }
+#bytes 32 items  
+orderKey:String!
+positionKey:String
+referralCode:String
+
+#address item
+market:String
+collateralToken:String
+affiliate:String
+trader:String
+uiFeeReceiver:String
+
+
+#uint Item 
+collateralTokenPriceMin:BigInt
+collateralTokenPriceMax:BigInt
+tradeSizeUsd:BigInt
+totalRebateFactor:BigInt
+traderDiscountFactor:BigInt
+totalRebateAmount:BigInt
+traderDiscountAmount:BigInt!
+affiliateRewardAmount:BigInt
+fundingFeeAmount:BigInt!
+claimableLongTokenAmount:BigInt
+claimableShortTokenAmount:BigInt
+latestFundingFeeAmountPerSize:BigInt
+latestLongTokenClaimableFundingAmountPerSize:BigInt
+latestShortTokenClaimableFundingAmountPerSize:BigInt
+borrowingFeeUsd:BigInt
+borrowingFeeAmount:BigInt!
+borrowingFeeReceiverFactor:BigInt
+borrowingFeeAmountForFeeReceiver:BigInt
+positionFeeFactor:BigInt
+protocolFeeAmount:BigInt!
+positionFeeReceiverFactor:BigInt
+feeReceiverAmount:BigInt
+feeAmountForPool:BigInt
+positionFeeAmountForPool:BigInt
+positionFeeAmount:BigInt!
+totalCostAmount:BigInt!
+uiFeeReceiverFactor:BigInt
+uiFeeAmount:BigInt!
+
+isIncrease:Boolean
+}

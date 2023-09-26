@@ -1,10 +1,12 @@
 import { BigInt } from "@graphprotocol/graph-ts"
 import { EventLog1 } from "../generated/EventEmitter/EventEmitter"
-import { DecreasePositionV2, PositionSettledV2, PositionSlotV2 } from "../generated/schema"
+import { DecreasePositionV2, feeV2, PositionSettledV2, PositionSlotV2, TradesV2 } from "../generated/schema"
 import { _resetPositionSlotV2 } from "./common"
 import { ADDRESS_ZERO } from "./const"
 import { EventData } from "./EventEmitter"
 import { returnValueOrZero } from "./increasePosition"
+import { updateDecreaseTradeAnalyticsV2 } from "./traderAnalyticsV2"
+import { updateDecreaseTradeAnalyticsV2Daily } from "./traderAnalyticsV2WithInterval"
 
 // event.params.eventData.uintItems[0] == sizeInusd and also the size in usd will be zero for close position
 
@@ -50,17 +52,11 @@ export function handleDecreasePositionEventV2(event: EventLog1,data: EventData):
     }
     const positionSlotV2=handleDecreasePosition(event,data,eventType)    
     if(positionSlotV2){
-
     if(eventType == 'Close'){
         handlePositionSettled(event ,positionSlotV2,data)
         _resetPositionSlotV2(positionSlotV2)
-    }
-   
-    // updateDecreaseTradeData() to be implemented
-   
+    }   
 }
-
-
 
 }
 
@@ -74,6 +70,10 @@ const positionSlotV2=PositionSlotV2.load(positionKey)
 if ( positionSlotV2 === null) {
     return null
 }
+// log.error("getting fee Data  called with id  {}",[`${event.transaction.hash.toHexString()}_${event.logIndex.minus(BigInt.fromString("1"))}`])
+const feeData=feeV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.minus(BigInt.fromString("1"))}`); 
+
+
 const collateralInUsd=data.getUintItem("collateralAmount")
 const sizeInToken=data.getUintItem("sizeInTokens")
 const sizeInUsd=data.getUintItem("sizeInUsd")
@@ -86,7 +86,8 @@ const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
 const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens")
 const executionPrice=data.getUintItem("executionPrice")
 const orderKey=data.getBytes32Item("orderKey")
-
+const collateralDeltaUsd=data.getIntItem("collateralDeltaAmount")
+const orderType=returnValueOrZero(data.getUintItem("orderType"))
 positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
 positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0")
 positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0")
@@ -142,16 +143,41 @@ decreasePositionData.transactionHash=event.transaction.hash.toHexString()
 decreasePositionData.transactionIndex=event.transaction.index
 decreasePositionData.logIndex=event.logIndex
 decreasePositionData.eventType=eventType.toString()
+decreasePositionData.collateralDeltaUsd=returnValueOrZero(collateralDeltaUsd)
+decreasePositionData.collateralInUsd=returnValueOrZero(collateralInUsd)
+decreasePositionData.linkId=positionSlotV2.linkId
+// decreasePositionData.save()
+if(feeData){
+  decreasePositionData.fundingFeeAmount=feeData.fundingFeeAmount
+  decreasePositionData.positionFeeAmount=feeData.positionFeeAmount
+  decreasePositionData.borrowingFeeAmount=feeData.borrowingFeeAmount
+  decreasePositionData.uiFeeAmount=feeData.uiFeeAmount
+  decreasePositionData.traderDiscountAmount=feeData.traderDiscountAmount
+  decreasePositionData.totalFeeAmount=feeData.totalCostAmount
+  decreasePositionData.feesUpdatedAt=event.block.timestamp
+  positionSlotV2.fundingFeeAmount=positionSlotV2.fundingFeeAmount.plus(feeData.fundingFeeAmount)
+  positionSlotV2.positionFeeAmount=positionSlotV2.positionFeeAmount.plus(feeData.positionFeeAmount)
+  positionSlotV2.borrowingFeeAmount=positionSlotV2.borrowingFeeAmount.plus(feeData.borrowingFeeAmount)
+  positionSlotV2.uiFeeAmount=positionSlotV2.uiFeeAmount.plus(feeData.uiFeeAmount)
+  positionSlotV2.traderDiscountAmount=positionSlotV2.traderDiscountAmount.plus(feeData.traderDiscountAmount)
+  positionSlotV2.totalFeeAmount=positionSlotV2.totalFeeAmount.plus(feeData.totalCostAmount)
+  positionSlotV2.feesUpdatedAt=event.block.timestamp
+  positionSlotV2.save()
+  decreasePositionData.save()  
+}
 decreasePositionData.save()
-
+if(orderType.equals(BigInt.fromString("7"))){
+    eventType="Liquidated"
+}  
+updateDecreaseTradeAnalyticsV2(event,data,eventType,positionKey)
+updateDecreaseTradeAnalyticsV2Daily(event,data,eventType,positionKey)
+updateDecreaseTradeData(decreasePositionData,event)
 return positionSlotV2
 
 }
 
- export function handlePositionSettled(event: EventLog1,positionSlotV2: PositionSlotV2,data: EventData): void{
-let positionSettled=new PositionSettledV2(`${event.transaction.hash}_${event.logIndex}`)
-
-
+export function handlePositionSettled(event: EventLog1,positionSlotV2: PositionSlotV2,data: EventData): void{
+let positionSettled=new PositionSettledV2(`${event.transaction.hash.toHexString()}_${event.logIndex}`)
 positionSettled.account=positionSlotV2.account
 positionSettled.collateralToken=positionSlotV2.collateralToken
 positionSettled.marketToken=positionSlotV2.marketToken
@@ -190,11 +216,68 @@ positionSettled.collateralTokenPriceMin=positionSlotV2.collateralTokenPriceMin
 positionSettled.indexTokenOpenPriceMin=positionSlotV2.indexTokenOpenPriceMin
 positionSettled.indexTokenOpenPriceMax=positionSlotV2.indexTokenOpenPriceMax
 positionSettled.sizeUpdatedAt=positionSlotV2.sizeUpdatedAt
-positionSettled.fundingFeeUsd=positionSlotV2.fundingFeeUsd
-positionSettled.positionFeeUsd=positionSlotV2.positionFeeUsd
-positionSettled.borrowingFeeUsd=positionSlotV2.borrowingFeeUsd
+
+positionSettled.fundingFeeAmount=positionSlotV2.fundingFeeAmount
+positionSettled.positionFeeAmount=positionSlotV2.positionFeeAmount
+positionSettled.borrowingFeeAmount=positionSlotV2.borrowingFeeAmount
+positionSettled.uiFeeAmount=positionSlotV2.uiFeeAmount
+positionSettled.traderDiscountAmount=positionSlotV2.traderDiscountAmount
+positionSettled.totalFeeAmount=positionSlotV2.totalFeeAmount
 positionSettled.feesUpdatedAt=positionSlotV2.feesUpdatedAt
+
+positionSettled.sizeInUsd=positionSlotV2.sizeInUsd
+positionSettled.sizeInToken=positionSlotV2.sizeInToken
+positionSettled.collateralInUsd=positionSlotV2.collateralInUsd
+positionSettled.linkId=positionSlotV2.linkId
+positionSettled.idCount=positionSlotV2.idCount
 positionSettled.save()
 return
 
 }
+
+export function updateDecreaseTradeData(entity : DecreasePositionV2 ,event: EventLog1): void{
+    const trade=new TradesV2(`${event.transaction.hash.toHexString()}_${event.logIndex}`)
+    
+    trade.positionKey=entity.positionKey
+    trade.orderKey=entity.orderKey
+    trade.account=entity.account
+    trade.indexToken=entity.indexToken
+    trade.marketToken=entity.marketToken
+    trade.collateralToken=entity.collateralToken
+  
+  
+  
+    trade.sizeDeltaInUsd=entity.sizeDeltaInUsd
+    trade.sizeDeltaInToken=entity.sizeDeltaInToken
+    trade.collateralInUsd=entity.collateralInUsd
+    trade.collateralDeltaUsd=entity.collateralDeltaUsd
+    trade.sizeInUsd=entity.sizeInUsd
+    trade.sizeInToken=entity.sizeInToken
+    trade.isLong=entity.isLong
+    // trade.acceptablePrice=entity.acceptablePrice
+    trade.executionPrice=entity.executionPrice
+    trade.indexTokenPriceMax=entity.indexTokenPriceMax
+    trade.indexTokenPriceMin=entity.indexTokenPriceMin
+    trade.collateralTokenPriceMin=entity.collateralTokenPriceMin
+    trade.collateralTokenPriceMax=entity.collateralTokenPriceMax
+    // trade.executionFee=entity.executionFee
+    trade.priceImpactUsd=entity.priceImpactUsd
+    trade.basePnlUsd=entity.basePnlUsd
+    trade.uncappedBasePnlUsd=entity.uncappedBasePnlUsd
+    trade.blockNumber=entity.blockNumber
+    trade.blockTimestamp=entity.blockTimestamp
+    trade.transactionHash=entity.transactionHash
+    trade.transactionIndex=entity.transactionIndex
+    trade.logIndex=entity.logIndex
+    trade.eventType=entity.eventType
+    trade.fundingFeeAmount=entity.fundingFeeAmount
+    trade.positionFeeAmount=entity.positionFeeAmount
+    trade.borrowingFeeAmount=entity.borrowingFeeAmount
+    trade.uiFeeAmount=entity.uiFeeAmount
+    trade.traderDiscountAmount=entity.traderDiscountAmount
+    trade.totalFeeAmount=entity.totalFeeAmount
+    trade.feesUpdatedAt=entity.feesUpdatedAt
+    trade.linkId=entity.linkId
+    trade.save()
+    return
+    }
