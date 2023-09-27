@@ -158,28 +158,28 @@ dataSources:
     source:
       address: "0xC8ee91A54287DB53897056e12D9819156D3822Fb"
       abi: EventEmitter
-      startBlock: 112935472
+      startBlock: 107737756 
     mapping:
       kind: ethereum/events
       apiVersion: 0.0.7
       language: wasm/assemblyscript
       entities:
-        - EventLog
+        # - EventLog
         - EventLog1
-        - EventLog2
+        # - EventLog2
       abis:
         - name: EventEmitter
           file: ./abis/EventEmitter.json
         - name: Reader
           file: ./abis/Reader.json
       eventHandlers:
-        - event: EventLog(address,string,indexed
-            string,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
-          handler: handleEventLog
+        # - event: EventLog(address,string,indexed
+        #     string,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
+          # handler: handleEventLog
         - event: EventLog1(address,string,indexed string,indexed
             bytes32,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
           handler: handleEventLog1
-        - event: EventLog2(address,string,indexed string,indexed bytes32,indexed
-            bytes32,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
-          handler: handleEventLog2
+        # - event: EventLog2(address,string,indexed string,indexed bytes32,indexed
+        #     bytes32,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))
+        #   handler: handleEventLog2
       file: ./src/gmxV2.ts
