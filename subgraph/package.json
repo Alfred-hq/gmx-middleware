@@ -9,7 +9,8 @@
     "create-local": "graph create --node http://localhost:8020/ gmx-house",
     "deploy-arbitrum": "graph deploy --node https://api.studio.thegraph.com/deploy/ gmx-house subgraph.arbitrum.yaml",
     "deploy-avalanche": "graph deploy --node https://api.studio.thegraph.com/deploy/ gmx-house subgraph.avalanche.yaml",
-    "deploy-local":"graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 gmx-house"
+    "deploy-local":"graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 gmx-house",
+    "deploy-studio": "graph deploy --studio temp-subgraph subgraph.arbitrum.yaml"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "^0.51.2",
