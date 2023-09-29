@@ -740,6 +740,14 @@ type IncreasePositionV2 @entity(immutable: true) {
   uncappedBasePnlUsd:BigInt
 
   linkId:String
+  indexTokenDecimal: BigInt!
+  longTokenDecimal: BigInt!
+  shortTokenDecimal: BigInt!
+  indexTokenGmxDecimal: BigInt!
+  longTokenGmxDecimal: BigInt!
+  shortTokenGmxDecimal: BigInt!
+  collateralTokenGmxDecimal: BigInt!
+  collateralTokenDecimal: BigInt!
 }
 
 type DecreasePositionV2 @entity(immutable: true) {
@@ -789,6 +797,14 @@ type DecreasePositionV2 @entity(immutable: true) {
   totalFeeAmount:BigInt!
   feesUpdatedAt: BigInt!
   linkId:String
+  indexTokenDecimal: BigInt!
+  longTokenDecimal: BigInt!
+  shortTokenDecimal: BigInt!
+  indexTokenGmxDecimal: BigInt!
+  longTokenGmxDecimal: BigInt!
+  shortTokenGmxDecimal: BigInt!
+  collateralTokenGmxDecimal: BigInt!
+  collateralTokenDecimal: BigInt!
 
 }
 
@@ -837,6 +853,14 @@ type TradesV2 @entity(immutable: true) {
   totalFeeAmount:BigInt!
   feesUpdatedAt: BigInt!
   linkId:String
+  indexTokenDecimal: BigInt!
+  longTokenDecimal: BigInt!
+  shortTokenDecimal: BigInt!
+  indexTokenGmxDecimal: BigInt!
+  longTokenGmxDecimal: BigInt!
+  shortTokenGmxDecimal: BigInt!
+  collateralTokenGmxDecimal: BigInt!
+  collateralTokenDecimal: BigInt!
 
 }
 
@@ -854,6 +878,14 @@ type PositionSlotV2 @entity {
   indexToken: String!
   longToken:String!
   shortToken:String!
+  indexTokenDecimal: BigInt!
+  longTokenDecimal: BigInt!
+  shortTokenDecimal: BigInt!
+  indexTokenGmxDecimal: BigInt!
+  longTokenGmxDecimal: BigInt!
+  shortTokenGmxDecimal: BigInt!
+  collateralTokenGmxDecimal: BigInt!
+  collateralTokenDecimal: BigInt!
   isLong: Boolean!
   key: String!
 
@@ -925,7 +957,14 @@ type PositionSettledV2 @entity(immutable: true) {
   shortToken:String!
   isLong: Boolean!
   key: String!
-
+  indexTokenDecimal: BigInt!
+  longTokenDecimal: BigInt!
+  shortTokenDecimal: BigInt!
+  indexTokenGmxDecimal: BigInt!
+  longTokenGmxDecimal: BigInt!
+  shortTokenGmxDecimal: BigInt!
+  collateralTokenGmxDecimal: BigInt!
+  collateralTokenDecimal: BigInt!
 
   
   #averagePrice: BigInt!#there is no need of average price the profit calculation is based on size and every time we increase or decrease the position size in token change 

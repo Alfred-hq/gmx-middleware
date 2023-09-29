@@ -81,6 +81,7 @@ import { EventData } from "./EventEmitter";
     trades.loseCount = positionSlotV2.basePnlUsd.le(BigInt.fromString("0"))
       ? trades.loseCount.plus(BigInt.fromString("1"))
       : trades.loseCount;
+    trades.cumulativePnl=trades.cumulativePnl.plus(positionSlotV2.basePnlUsd)
     }
     if(eventType == 'Liquidated'){
       trades.totalLiquidated=trades.totalLiquidated.plus(BigInt.fromString("1"))
