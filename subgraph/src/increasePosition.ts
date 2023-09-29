@@ -3,7 +3,7 @@ import { EventData } from "./EventEmitter"
 import {feeV2, IncreasePositionV2, PositionSlotV2, TradesV2} from "../generated/schema"
 import { getMarketData, getPositionLinkId, returnAddressOrZeroAddress, _resetPositionSlotV2 } from "./common";
 import { BigInt } from "@graphprotocol/graph-ts";
-import { ADDRESS_ZERO, ZERO_BI } from "./const";
+import { ADDRESS_ZERO, getTokenDataByAddress, ZERO_BI } from "./const";
 import { updateIncreaseTradeAnalyticsV2 } from "./traderAnalyticsV2";
 import { updateIncreaseTradeAnalyticsV2Daily } from "./traderAnalyticsV2WithInterval";
 // event.params.eventData.uintItems[0] == sizeinusd
@@ -62,8 +62,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         positionSlotV2.idCount=positionSlotV2.idCount.plus(BigInt.fromString("1"))
         positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),positionKey)
     }
-    const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount"))
-    const sizeInToken=returnValueOrZero(data.getUintItem("sizeInToken"))
+    const sizeInToken=returnValueOrZero(data.getUintItem("sizeInTokens"))
     const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
     const indexTokenPriceMax=returnValueOrZero(data.getUintItem("indexTokenPrice.max"))
     const indexTokenPriceMin=returnValueOrZero(data.getUintItem("indexTokenPrice.min"))
@@ -71,8 +70,9 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     const collateralTokenPriceMin=returnValueOrZero(data.getUintItem("collateralTokenPrice.min"))
     const sizeDeltaInUsd=returnValueOrZero(data.getUintItem("sizeDeltaUsd"))
     const sizeDeltaInToken=returnValueOrZero(data.getUintItem("sizeDeltaInTokens"))
-    const collateralDeltaUsd=returnValueOrZero(data.getIntItem("collateralDeltaAmount"))
-    const collateralUsd=returnValueOrZero(data.getUintItem("collateralAmount"))
+    const collateralDeltaUsd=returnValueOrZero(data.getIntItem("collateralDeltaAmount")).times(collateralTokenPriceMin)
+    const collateralUsd=returnValueOrZero(data.getUintItem("collateralAmount")).times(collateralTokenPriceMin)
+    const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount")).times(collateralTokenPriceMin)
     const orderKey=data.getBytes32Item("orderKey")
     const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
       
@@ -144,6 +144,14 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
         increasePositionData.totalFeeAmount=feeData.totalCostAmount
         increasePositionData.feesUpdatedAt=event.block.timestamp  
     }
+    increasePositionData.indexTokenDecimal=positionSlotV2.indexTokenDecimal
+    increasePositionData.longTokenDecimal=positionSlotV2.longTokenDecimal
+    increasePositionData.shortTokenDecimal=positionSlotV2.shortTokenDecimal
+    increasePositionData.indexTokenGmxDecimal=positionSlotV2.indexTokenGmxDecimal
+    increasePositionData.longTokenGmxDecimal=positionSlotV2.longTokenGmxDecimal
+    increasePositionData.shortTokenGmxDecimal=positionSlotV2.shortTokenGmxDecimal
+    increasePositionData.collateralTokenDecimal=positionSlotV2.collateralTokenDecimal
+    increasePositionData.collateralTokenGmxDecimal=positionSlotV2.collateralTokenGmxDecimal
     increasePositionData.save()
     updateDecreaseTradeData(increasePositionData ,event )
     updateIncreaseTradeAnalyticsV2(event,data,eventType,keyBytes32.toHexString())
@@ -191,6 +199,14 @@ export function createOrLoadPositionSlot(key: string, data : EventData): Positio
     positionSlotV2.uncappedBasePnlUsd=ZERO_BI
     positionSlotV2.idCount=ZERO_BI
     positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),key)
+    positionSlotV2.indexTokenDecimal=BigInt.fromString(getTokenDataByAddress(indexToken)[0].toString())
+    positionSlotV2.longTokenDecimal=BigInt.fromString(getTokenDataByAddress(longToken)[0].toString())
+    positionSlotV2.shortTokenDecimal=BigInt.fromString(getTokenDataByAddress(longToken)[0].toString())
+    positionSlotV2.indexTokenGmxDecimal=BigInt.fromString('30').minus(positionSlotV2.indexTokenDecimal)
+    positionSlotV2.longTokenGmxDecimal=BigInt.fromString('30').minus(positionSlotV2.longTokenDecimal)
+    positionSlotV2.shortTokenGmxDecimal=BigInt.fromString('30').minus(positionSlotV2.shortTokenDecimal)
+    positionSlotV2.collateralTokenDecimal=BigInt.fromString(getTokenDataByAddress(positionSlotV2.collateralToken)[0].toString())
+    positionSlotV2.collateralTokenGmxDecimal=BigInt.fromString('30').minus(positionSlotV2.collateralTokenDecimal)
     _resetPositionSlotV2(positionSlotV2)
     return positionSlotV2
 }
@@ -238,6 +254,14 @@ export function updateDecreaseTradeData(entity : IncreasePositionV2 ,event: Even
     trade.totalFeeAmount=entity.totalFeeAmount
     trade.feesUpdatedAt=entity.feesUpdatedAt
     trade.linkId=entity.linkId
+    trade.indexTokenDecimal=entity.indexTokenDecimal
+    trade.longTokenDecimal=entity.longTokenDecimal
+    trade.shortTokenDecimal=entity.shortTokenDecimal
+    trade.indexTokenGmxDecimal=entity.indexTokenGmxDecimal
+    trade.longTokenGmxDecimal=entity.longTokenGmxDecimal
+    trade.shortTokenGmxDecimal=entity.shortTokenGmxDecimal
+    trade.collateralTokenDecimal=entity.collateralTokenDecimal
+    trade.collateralTokenGmxDecimal=entity.collateralTokenGmxDecimal
     trade.save()
     return
     }
