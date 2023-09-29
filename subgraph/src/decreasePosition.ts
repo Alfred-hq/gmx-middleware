@@ -164,7 +164,7 @@ if(feeData){
   positionSlotV2.totalFeeAmount=positionSlotV2.totalFeeAmount.plus(feeData.totalCostAmount)
   positionSlotV2.feesUpdatedAt=event.block.timestamp
   positionSlotV2.save()
-  decreasePositionData.save()  
+//   decreasePositionData.save()  
 }
 decreasePositionData.indexTokenDecimal=positionSlotV2.indexTokenDecimal
 decreasePositionData.longTokenDecimal=positionSlotV2.longTokenDecimal
