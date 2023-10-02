@@ -1,6 +1,7 @@
 import { ADDRESS_ZERO, ZERO_BI } from "./const";
 import { PositionSlotV2 } from "../generated/schema";
 import * as gmxReader from "../generated/EventEmitter/Reader";
+import * as arbInfo from "../generated/EventEmitter/ArbInfo"
 import { Address, Bytes, log } from "@graphprotocol/graph-ts";
 export function getMarketData(marketAddress: string): Array<string>{
     // add contract call to reader contract to get market data
@@ -80,3 +81,12 @@ export function returnAddressOrZeroAddress(value:string | null) : string{
 export const getPositionLinkId = (id: i32, key: string): string => {
   return `PositionLink_${id.toString()}_${key}`
 };
+
+export function checkContract(address:string):boolean {
+  let result=false
+  let callResult = arbInfo.ArbInfo.bind(
+    Address.fromString("0x0000000000000000000000000000000000000065")
+  ).try_getCode(Address.fromString(address))
+   result=callResult.reverted ? false : callResult.value.length > 0
+  return result
+}

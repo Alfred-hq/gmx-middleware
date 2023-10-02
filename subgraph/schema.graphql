@@ -1192,3 +1192,22 @@ uiFeeAmount:BigInt!
 
 isIncrease:Boolean
 }
+
+type oraclePrice @entity(immutable:true){
+  id:String!
+  minPrice:BigInt!
+  maxPrice:BigInt!
+  tokenAddress:String!
+  isPriceFeed:Boolean
+  blockNumber:BigInt!
+  blockTimestamp:BigInt!
+  transactionHash:String!
+  logIndex:BigInt!
+  token:Token!
+}
+
+type Token @entity(immutable:true){
+  id:String!
+  token:String!
+  isSyn:Boolean
+}

@@ -1,4 +1,4 @@
-import { BigInt } from "@graphprotocol/graph-ts"
+import { Address, BigInt } from "@graphprotocol/graph-ts"
 
 export const ADDRESS_ZERO = '0x0000000000000000000000000000000000000000'
 export const ZERO_BYTES32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -171,6 +171,5 @@ export class  Token {
         }
     }
     return ["29","30"]
-
     
   }
