@@ -172,6 +172,8 @@ dataSources:
           file: ./abis/EventEmitter.json
         - name: Reader
           file: ./abis/Reader.json
+        - name: ArbInfo
+          file: ./abis/ArbInfo.json
       eventHandlers:
         # - event: EventLog(address,string,indexed
         #     string,(((string,address)[],(string,address[])[]),((string,uint256)[],(string,uint256[])[]),((string,int256)[],(string,int256[])[]),((string,bool)[],(string,bool[])[]),((string,bytes32)[],(string,bytes32[])[]),((string,bytes)[],(string,bytes[])[]),((string,string)[],(string,string[])[])))

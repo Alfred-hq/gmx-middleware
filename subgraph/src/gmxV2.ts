@@ -13,6 +13,7 @@ import { log } from '@graphprotocol/graph-ts'
 import { handleFeeEventV2 } from "./gmxV2Fee";
 import { DecreasePositionV2, feeV2, PositionSettledV2, PositionSlotV2, IncreasePositionV2, TradesV2 } from "../generated/schema"
 import { EventLog1 } from "../generated/EventEmitter/EventEmitter";
+import { handleOraclePriceUpdateEvent } from "./gmxv2Prices";
 
 
 // export function handleEventLog(event: EventLogEvent): void {
@@ -26,8 +27,10 @@ export function handleEventLog1(event: EventLog1Event): void {
   const isFeeEvent = eventName == "PositionFeesCollected"
   const isIncEvent = eventName == "PositionIncrease"
   const isDecEvent = eventName == "PositionDecrease"
+  const isPriceEvent = eventName == "OraclePriceUpdate"
+
   const data = new EventData(event.params.eventData)
-  if (!isFeeEvent && !isIncEvent && !isDecEvent) {
+  if (!isFeeEvent && !isIncEvent && !isDecEvent && !isPriceEvent) {
     return
   }
   if(isIncEvent){
@@ -41,6 +44,10 @@ export function handleEventLog1(event: EventLog1Event): void {
   if(isFeeEvent){
     log.debug("fee event ",[])
     handleFeeEventV2(event,data)
+  }
+  if(isPriceEvent){
+    log.debug("price event",[])
+    handleOraclePriceUpdateEvent(event,data)
   }
   return
 }
