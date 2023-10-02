@@ -54,4 +54,4 @@ jobs:
         run: pnpm graph create alfred-gmx-arbitrum-v3-${{ steps.branch-name.outputs.current_branch }} --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }}
 
       - name: Deploy Subgraph
-        run: pnpm graph deploy alfred-gmx-arbitrum-v3-${{ steps.branch-name.outputs.current_branch }} subgraph.arbitrum.yaml --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }} --version-label v1.0.1-${{ steps.branch-name.outputs.current_branch }} --ipfs https://api.thegraph.com/ipfs/
+        run: pnpm graph deploy alfred-gmx-arbitrum-v3-${{ steps.branch-name.outputs.current_branch }} subgraph.arbitrum.yaml --node ${{ secrets.THE_GRAPH_NODE_DEPLOY_URL }} --version-label v1.0.2-${{ steps.branch-name.outputs.current_branch }} --ipfs https://api.thegraph.com/ipfs/
