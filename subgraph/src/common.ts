@@ -1,25 +1,42 @@
 import { ADDRESS_ZERO, ZERO_BI } from "./const";
-import { PositionSlotV2 } from "../generated/schema";
+import { Market, PositionSlotV2 } from "../generated/schema";
 import * as gmxReader from "../generated/EventEmitter/Reader";
 import * as arbInfo from "../generated/EventEmitter/ArbInfo"
 import { Address, Bytes, log } from "@graphprotocol/graph-ts";
 export function getMarketData(marketAddress: string): Array<string>{
     // add contract call to reader contract to get market data
     //for the current available market we can use constant file to reduce rpc calls
-    log.error("called market token contract {}",[marketAddress]);
-    let marketCallResult = gmxReader.Reader.bind(
+    let indexToken=ADDRESS_ZERO
+    let longToken=ADDRESS_ZERO;
+    let shortToken=ADDRESS_ZERO;
+    const marketTokenData=Market.load(marketAddress)
+
+    if(marketTokenData){
+      indexToken=marketTokenData.indexToken
+      longToken=marketTokenData.longToken
+      shortToken=marketTokenData.shortToken
+    }
+    else{
+      let marketCallResult = gmxReader.Reader.bind(
         Address.fromString("0x38d91ED96283d62182Fc6d990C24097A918a4d9b") 
       ).try_getMarket(Address.fromString("0xFD70de6b91282D8017aA4E741e9Ae325CAb992d8"),Address.fromString(marketAddress))
       let marketData = !marketCallResult.reverted ?  marketCallResult.value : null
-      let indexToken=ADDRESS_ZERO
-      let longToken=ADDRESS_ZERO;
-      let shortToken=ADDRESS_ZERO;
+      
       if(marketData){
         log.error("call succefull",[marketData.indexToken.toHexString()]);
         indexToken=marketData.indexToken.toHexString()
         longToken=marketData.longToken.toHexString()
         shortToken=marketData.shortToken.toHexString()
+        //updating market to save this as well
+        const marketTokenEntity=new Market(marketAddress)
+        marketTokenEntity.marketToken=marketAddress
+        marketTokenEntity.indexToken=indexToken
+        marketTokenEntity.longToken=longToken
+        marketTokenEntity.shortToken=shortToken
+        marketTokenEntity.save()
       }
+    }
+  
    
     return [indexToken,longToken,shortToken]
 }

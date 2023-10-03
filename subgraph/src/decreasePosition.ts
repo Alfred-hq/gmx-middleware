@@ -47,8 +47,7 @@ export function handleDecreasePositionEventV2(event: EventLog1,data: EventData):
     let eventType="Decrease"
     const sizeInUsd=data.getUintItem("sizeInUsd")
     if(sizeInUsd && sizeInUsd.equals(ZERO_BI)){
-            eventType="Close"
-          
+            eventType="Close"  
     }
     const positionSlotV2=handleDecreasePosition(event,data,eventType)    
     if(positionSlotV2){
@@ -80,15 +79,19 @@ const indexTokenPriceMin=data.getUintItem("indexTokenPrice.min")
 const collateralTokenPriceMax=returnValueOrZero(data.getUintItem("collateralTokenPrice.max"))
 const collateralTokenPriceMin=returnValueOrZero(data.getUintItem("collateralTokenPrice.min"))
 const account=data.getAddressItem("account")
-const sizeDeltaInUsd=data.getUintItem("sizeDeltaUsd")
-const sizeDeltaInToken=data.getUintItem("sizeDeltaInTokens")
-const executionPrice=data.getUintItem("executionPrice")
+const sizeDeltaInUsd=returnValueOrZero(data.getUintItem("sizeDeltaUsd"))
+const sizeDeltaInToken=returnValueOrZero(data.getUintItem("sizeDeltaInTokens"))
+const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
 const orderKey=data.getBytes32Item("orderKey")
 const collateralDeltaUsd=returnValueOrZero(data.getIntItem("collateralDeltaAmount")).times(collateralTokenPriceMin)
 const orderType=returnValueOrZero(data.getUintItem("orderType"))
 const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount")).times(collateralTokenPriceMin)
 const sizeInToken=returnValueOrZero(data.getUintItem("sizeInTokens"))
 const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
+let averagePrice= sizeInUsd.notEqual(ZERO_BI) && sizeInToken.notEqual(ZERO_BI) ? sizeInUsd.div(sizeInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
+if(eventType == 'Close'){
+    averagePrice=sizeDeltaInUsd.notEqual(ZERO_BI) && sizeDeltaInToken.notEqual(ZERO_BI) ? sizeDeltaInUsd.div(sizeDeltaInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
+}   
 positionSlotV2.collateralInUsd=collateralInUsd?collateralInUsd:BigInt.fromString("0")
 positionSlotV2.sizeInToken=sizeInToken?sizeInToken:BigInt.fromString("0")
 positionSlotV2.sizeInUsd=sizeInUsd?sizeInUsd:BigInt.fromString("0")
@@ -102,13 +105,14 @@ positionSlotV2.lastDecreasedIndexTokenPriceMin=returnValueOrZero(indexTokenPrice
 positionSlotV2.lastDecreasedIndexTokenPriceMax = returnValueOrZero(indexTokenPriceMax)
 positionSlotV2.lastDecreasedCollateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
 positionSlotV2.lastDecreasedCollateralTokenPriceMin=collateralTokenPriceMin
-
+positionSlotV2.executionPrice=executionPrice
 // pnl data 
 const basePnlUsd=data.getIntItem("basePnlUsd")
 const uncappedPnlUsd=data.getIntItem("uncappedBasePnlUsd")
 const priceImpactUsd=data.getUintItem("priceImpactUsd")
 positionSlotV2.basePnlUsd=positionSlotV2.basePnlUsd.plus( returnValueOrZero(basePnlUsd))
 positionSlotV2.uncappedBasePnlUsd=positionSlotV2.uncappedBasePnlUsd.plus(returnValueOrZero(uncappedPnlUsd))
+positionSlotV2.averagePrice=averagePrice
 positionSlotV2.save()
 
 
@@ -174,6 +178,7 @@ decreasePositionData.longTokenGmxDecimal=positionSlotV2.longTokenGmxDecimal
 decreasePositionData.shortTokenGmxDecimal=positionSlotV2.shortTokenGmxDecimal
 decreasePositionData.collateralTokenDecimal=positionSlotV2.collateralTokenDecimal
 decreasePositionData.collateralTokenGmxDecimal=positionSlotV2.collateralTokenGmxDecimal
+decreasePositionData.averagePrice=averagePrice
 decreasePositionData.save()
 if(orderType.equals(BigInt.fromString("7"))){
     eventType="Liquidated"
@@ -186,6 +191,8 @@ return positionSlotV2
 }
 
 export function handlePositionSettled(event: EventLog1,positionSlotV2: PositionSlotV2,data: EventData): void{
+const orderType=returnValueOrZero(data.getUintItem("orderType"))
+
 let positionSettled=new PositionSettledV2(`${event.transaction.hash.toHexString()}_${event.logIndex}`)
 positionSettled.account=positionSlotV2.account
 positionSettled.collateralToken=positionSlotV2.collateralToken
@@ -247,6 +254,14 @@ positionSettled.longTokenGmxDecimal=positionSlotV2.longTokenGmxDecimal
 positionSettled.shortTokenGmxDecimal=positionSlotV2.shortTokenGmxDecimal
 positionSettled.collateralTokenDecimal=positionSlotV2.collateralTokenDecimal
 positionSettled.collateralTokenGmxDecimal=positionSlotV2.collateralTokenGmxDecimal
+positionSettled.settledPrice=positionSlotV2.executionPrice
+positionSettled.averagePrice=positionSlotV2.averagePrice
+positionSettled.is_liquidated=false
+positionSettled.transactionHash=event.transaction.hash.toHexString()
+positionSettled.logIndex=event.logIndex
+if(orderType.equals(BigInt.fromString("7"))){
+    positionSettled.is_liquidated=true
+}  
 positionSettled.save()
 return
 
@@ -303,6 +318,7 @@ export function updateDecreaseTradeData(entity : DecreasePositionV2 ,event: Even
     trade.shortTokenGmxDecimal=entity.shortTokenGmxDecimal
     trade.collateralTokenDecimal=entity.collateralTokenDecimal
     trade.collateralTokenGmxDecimal=entity.collateralTokenGmxDecimal
+    trade.averagePrice=entity.averagePrice
     trade.save()
     return
     }

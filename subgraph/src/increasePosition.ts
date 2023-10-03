@@ -75,6 +75,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount")).times(collateralTokenPriceMin)
     const orderKey=data.getBytes32Item("orderKey")
     const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
+    const averagePrice= sizeInUsd.notEqual(ZERO_BI) && sizeInToken.notEqual(ZERO_BI) ? sizeInUsd.div(sizeInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
       
     positionSlotV2.collateralInUsd=collateralInUsd
     positionSlotV2.sizeInToken=sizeInToken
@@ -101,7 +102,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     positionSlotV2.totalFeeAmount=positionSlotV2.totalFeeAmount.plus(feeData.totalCostAmount)
     positionSlotV2.feesUpdatedAt=event.block.timestamp
     }  
-  
+    positionSlotV2.averagePrice=averagePrice
     positionSlotV2.save()
   let increasePositionData= IncreasePositionV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.toString()}`)
 
@@ -152,6 +153,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     increasePositionData.shortTokenGmxDecimal=positionSlotV2.shortTokenGmxDecimal
     increasePositionData.collateralTokenDecimal=positionSlotV2.collateralTokenDecimal
     increasePositionData.collateralTokenGmxDecimal=positionSlotV2.collateralTokenGmxDecimal
+    increasePositionData.averagePrice=averagePrice
     increasePositionData.save()
     updateDecreaseTradeData(increasePositionData ,event )
     updateIncreaseTradeAnalyticsV2(event,data,eventType,keyBytes32.toHexString())
@@ -262,6 +264,7 @@ export function updateDecreaseTradeData(entity : IncreasePositionV2 ,event: Even
     trade.shortTokenGmxDecimal=entity.shortTokenGmxDecimal
     trade.collateralTokenDecimal=entity.collateralTokenDecimal
     trade.collateralTokenGmxDecimal=entity.collateralTokenGmxDecimal
+    trade.averagePrice=entity.averagePrice
     trade.save()
     return
     }
