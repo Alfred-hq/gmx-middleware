@@ -748,6 +748,7 @@ type IncreasePositionV2 @entity(immutable: true) {
   shortTokenGmxDecimal: BigInt!
   collateralTokenGmxDecimal: BigInt!
   collateralTokenDecimal: BigInt!
+  averagePrice:BigInt
 }
 
 type DecreasePositionV2 @entity(immutable: true) {
@@ -805,6 +806,7 @@ type DecreasePositionV2 @entity(immutable: true) {
   shortTokenGmxDecimal: BigInt!
   collateralTokenGmxDecimal: BigInt!
   collateralTokenDecimal: BigInt!
+  averagePrice: BigInt
 
 }
 
@@ -861,6 +863,7 @@ type TradesV2 @entity(immutable: true) {
   shortTokenGmxDecimal: BigInt!
   collateralTokenGmxDecimal: BigInt!
   collateralTokenDecimal: BigInt!
+  averagePrice:BigInt
 
 }
 
@@ -918,7 +921,8 @@ type PositionSlotV2 @entity {
   lastIncreasedCollateralTokenPriceMax: BigInt!
   lastDecreasedCollateralTokenPriceMin: BigInt!
   lastDecreasedCollateralTokenPriceMax: BigInt
-
+  averagePrice:BigInt
+  executionPrice:BigInt
 
   #v2 specific Data
   priceImpactUsd: BigInt!
@@ -997,6 +1001,9 @@ type PositionSettledV2 @entity(immutable: true) {
   lastIncreasedCollateralTokenPriceMax: BigInt!
   lastDecreasedCollateralTokenPriceMin: BigInt!
   lastDecreasedCollateralTokenPriceMax: BigInt
+  averagePrice:BigInt
+  settledPrice:BigInt
+  is_liquidated:Boolean
 
 
   #v2 specific Data
@@ -1020,6 +1027,8 @@ type PositionSettledV2 @entity(immutable: true) {
   traderDiscountAmount:BigInt!
   totalFeeAmount:BigInt!
   feesUpdatedAt: BigInt!
+  transactionHash:String
+  logIndex:BigInt
 }
 
 
@@ -1210,4 +1219,12 @@ type Token @entity(immutable:true){
   id:String!
   token:String!
   isSyn:Boolean
+}
+
+type Market @entity(immutable:true){
+  id:String!
+  marketToken:String!
+  indexToken:String!
+  longToken:String!
+  shortToken:String!
 }
