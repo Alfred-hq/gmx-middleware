@@ -15,11 +15,11 @@ export function updateIncreaseTradeAnalytics(
   const trades = initializeAnalyticsEntity(event.params.account.toHexString());
 
   trades.increaseCount = trades.increaseCount.plus(BigInt.fromString("1"));
-  trades.cumulativeSize = event.params.sizeDelta.plus(trades.cumulativeSize);
-  trades.cumulativeCollateral = event.params.collateralDelta.plus(
+  trades.cumulativeSizeOpen = event.params.sizeDelta.plus(trades.cumulativeSize);
+  trades.cumulativeCollateralOpen = event.params.collateralDelta.plus(
     trades.cumulativeCollateral
   );
-  trades.cumulativeFee = event.params.fee.plus(trades.cumulativeFee);
+  trades.cumulativeFeeOpen = event.params.fee.plus(trades.cumulativeFee);
 
   trades.save();
 }
@@ -30,7 +30,7 @@ export function updateDecreaseTradeAnalytics(
   const trades = initializeAnalyticsEntity(event.params.account.toHexString());
 
   trades.decreaseCount = trades.decreaseCount.plus(BigInt.fromString("1"));
-  trades.cumulativeFee = event.params.fee.plus(trades.cumulativeFee);
+  trades.cumulativeFeeOpen = event.params.fee.plus(trades.cumulativeFee);
 
   trades.save();
 }
@@ -111,13 +111,21 @@ export function updateCloseTradeAnalytics(event: ClosePositionEvent): void {
   trades.loseCount = positionSettled.realisedPnl.le(BigInt.fromString("0"))
     ? trades.loseCount.plus(BigInt.fromString("1"))
     : trades.loseCount;
-
+  trades.cumulativeCollateral=trades.cumulativeCollateral.plus(positionSettled.maxCollateral)
+  trades.cumulativeFee=trades.cumulativeFee.plus(positionSettled.cumulativeFee)
+  trades.cumulativeSize=trades.cumulativeSize.plus(positionSettled.maxSize)
   trades.save();
 }
 
 export function updateLiquidateTradeAnalytics(
   event: LiquidatePositionEvent
 ): void {
+  const positionSettled = PositionSettled.load(
+    Bytes.fromUTF8("PositionSettled")
+      .concat(event.transaction.hash.concatI32(event.logIndex.toI32()))
+      .toHexString()
+  );
+  if (positionSettled === null) return;
   const trades = initializeAnalyticsEntity(event.params.account.toHexString());
 
   trades.totalPositions = trades.totalPositions.plus(BigInt.fromString("1"));
@@ -130,7 +138,9 @@ export function updateLiquidateTradeAnalytics(
   trades.loseCountWithFee = trades.loseCountWithFee.plus(
     BigInt.fromString("1")
   );
-
+  trades.cumulativeCollateral=trades.cumulativeCollateral.plus(positionSettled.maxCollateral)
+  trades.cumulativeFee=trades.cumulativeFee.plus(positionSettled.cumulativeFee)
+  trades.cumulativeSize=trades.cumulativeSize.plus(positionSettled.maxSize)
   trades.save();
 }
 
@@ -159,6 +169,9 @@ function initializeAnalyticsEntity(account: string): TraderAnalytics {
   trades.loseCount = ZERO_BI;
   trades.winCountWithFee = ZERO_BI;
   trades.loseCountWithFee = ZERO_BI;
+  trades.cumulativeCollateralOpen=ZERO_BI;
+  trades.cumulativeFeeOpen=ZERO_BI;
+  trades.cumulativeSizeOpen=ZERO_BI;
 
   return trades;
 }
