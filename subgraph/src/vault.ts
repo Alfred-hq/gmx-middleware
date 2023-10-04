@@ -251,12 +251,12 @@ export function handleUpdatePosition(event: UpdatePositionEvent): void {
   );
 
   let price = ZERO_BI;
-  if (event.block.number.gt(BigInt.fromString("30020987"))) {
-    let priceCallResult = vaultPricefeed.VaultPricefeed.bind(
-      vaultPricefeedAddress
-    ).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false);
-    price = priceCallResult.reverted ? ZERO_BI : priceCallResult.value;
-  }
+  // if (event.block.number.gt(BigInt.fromString("30020987"))) {
+  //   let priceCallResult = vaultPricefeed.VaultPricefeed.bind(
+  //     vaultPricefeedAddress
+  //   ).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false);
+  //   price = priceCallResult.reverted ? ZERO_BI : priceCallResult.value;
+  // }
   entity.link = getPositionLinkId(
     positionSlot.idCount,
     event.params.key
@@ -416,12 +416,12 @@ export function handleClosePosition(event: ClosePositionEvent): void {
       .toHexString()
   );
   let price = ZERO_BI;
-  if (event.block.number.gt(BigInt.fromString("30020987"))) {
-    let priceCallResult = vaultPricefeed.VaultPricefeed.bind(
-      vaultPricefeedAddress
-    ).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false);
-    price = priceCallResult.reverted ? ZERO_BI : priceCallResult.value;
-  }
+  // if (event.block.number.gt(BigInt.fromString("30020987"))) {
+  //   let priceCallResult = vaultPricefeed.VaultPricefeed.bind(
+  //     vaultPricefeedAddress
+  //   ).try_getPrimaryPrice(Address.fromString(positionSlot.indexToken), false);
+  //   price = priceCallResult.reverted ? ZERO_BI : priceCallResult.value;
+  // }
   const positionLink = PositionLink.load(positionSlot.link);
   if (positionLink != null) {
     positionLink.cumulativeCollateral = positionSlot.cumulativeCollateral;

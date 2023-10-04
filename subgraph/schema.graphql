@@ -597,6 +597,9 @@ type TraderAnalytics @entity {
   winCount: BigInt!
   loseCountWithFee: BigInt!
   loseCount: BigInt!
+  cumulativeCollateralOpen: BigInt!
+  cumulativeSizeOpen: BigInt!
+  cumulativeFeeOpen: BigInt!
 }
 
  type TraderAnalyticsDaily @entity {
@@ -1052,6 +1055,9 @@ type TraderAnalyticsV2 @entity {
   winCount: BigInt!
   loseCountWithFee: BigInt!
   loseCount: BigInt!
+  cumulativeCollateralOpen: BigInt!
+  cumulativeSizeOpen: BigInt!
+  cumulativeFeeOpen: BigInt!
 }
 
  type TraderAnalyticsV2Daily @entity {
