@@ -20,11 +20,11 @@ import { EventData } from "./EventEmitter";
     const trades = initializeV2AnalyticsEntity(positionSlotV2.account);
   
     trades.increaseCount = trades.increaseCount.plus(BigInt.fromString("1"));
-    trades.cumulativeSize = increasePositionV2.sizeDeltaInUsd.plus(trades.cumulativeSize);
-    trades.cumulativeCollateral = increasePositionV2.collateralInUsd.plus(
-      trades.cumulativeCollateral
+    trades.cumulativeSizeOpen = increasePositionV2.sizeDeltaInUsd.plus(trades.cumulativeSizeOpen);
+    trades.cumulativeCollateralOpen = increasePositionV2.collateralInUsd.plus(
+      trades.cumulativeCollateralOpen
     );
-    trades.cumulativeFee = increasePositionV2.totalFeeAmount.plus(trades.cumulativeFee);
+    trades.cumulativeFeeOpen = increasePositionV2.totalFeeAmount.plus(trades.cumulativeFeeOpen);
     trades.maxCollateral =
     increasePositionV2.collateralInUsd.gt(trades.maxCollateral)
         ? increasePositionV2.collateralInUsd
@@ -59,7 +59,7 @@ import { EventData } from "./EventEmitter";
     const trades = initializeV2AnalyticsEntity(positionSlotV2.account);
   
     trades.decreaseCount = trades.decreaseCount.plus(BigInt.fromString("1"));
-    trades.cumulativeFee = decreasePositionV2.totalFeeAmount.plus(trades.cumulativeFee);
+    trades.cumulativeFeeOpen = decreasePositionV2.totalFeeAmount.plus(trades.cumulativeFeeOpen);
     if(eventType == 'Close' || eventType == 'Liquidated'){
     const netPnl = positionSlotV2.basePnlUsd.minus(
         positionSlotV2.cumulativeFee
@@ -82,6 +82,9 @@ import { EventData } from "./EventEmitter";
       ? trades.loseCount.plus(BigInt.fromString("1"))
       : trades.loseCount;
     trades.cumulativePnl=trades.cumulativePnl.plus(positionSlotV2.basePnlUsd)
+    trades.cumulativeCollateral=trades.cumulativeCollateral.plus(positionSlotV2.maxCollateral)
+    trades.cumulativeSize=trades.cumulativeSize.plus(positionSlotV2.maxSize)
+    trades.cumulativeFee=trades.cumulativeFee.plus(positionSlotV2.cumulativeFee)
     }
     if(eventType == 'Liquidated'){
       trades.totalLiquidated=trades.totalLiquidated.plus(BigInt.fromString("1"))
@@ -116,6 +119,9 @@ import { EventData } from "./EventEmitter";
     trades.loseCount = ZERO_BI;
     trades.winCountWithFee = ZERO_BI;
     trades.loseCountWithFee = ZERO_BI;
+    trades.cumulativeCollateralOpen=ZERO_BI;
+    trades.cumulativeSizeOpen=ZERO_BI;
+    trades.cumulativeFeeOpen=ZERO_BI;
   
     return trades;
   }
