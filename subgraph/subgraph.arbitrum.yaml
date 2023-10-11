@@ -3,40 +3,40 @@ description: gmx subgraph middlware for arbitrum-one
 schema:
   file: ./schema.graphql
 dataSources:
-  # - kind: ethereum
-  #   name: PositionRouter
-  #   network: arbitrum-one
-  #   source:
-  #     address: "0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868"
-  #     abi: PositionRouter
-  #     startBlock: 29856750
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.7
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - Callback
-  #       - CreateDecreasePosition
-  #       - CreateIncreasePosition
-  #       - ExecuteDecreasePosition
-  #       - ExecuteDecreasePosition
-  #     abis:
-  #       - name: PositionRouter
-  #         file: ./abis/PositionRouter.json
-  #     eventHandlers:
-  #       - event: CreateDecreasePosition(indexed
-  #           address,address[],address,uint256,uint256,bool,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
-  #         handler: handleCreateDecreasePosition
-  #       - event: CreateIncreasePosition(indexed
-  #           address,address[],address,uint256,uint256,uint256,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
-  #         handler: handleCreateIncreasePosition
-  #       - event: ExecuteDecreasePosition(indexed
-  #           address,address[],address,uint256,uint256,bool,address,uint256,uint256,uint256,uint256,uint256)
-  #         handler: handleExecuteDecreasePosition
-  #       - event: ExecuteIncreasePosition(indexed
-  #           address,address[],address,uint256,uint256,uint256,bool,uint256,uint256,uint256,uint256)
-  #         handler: handleExecuteIncreasePosition
-  #     file: ./src/positionRouter.ts
+  - kind: ethereum
+    name: PositionRouter
+    network: arbitrum-one
+    source:
+      address: "0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868"
+      abi: PositionRouter
+      startBlock: 29856750
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - Callback
+        - CreateDecreasePosition
+        - CreateIncreasePosition
+        - ExecuteDecreasePosition
+        - ExecuteDecreasePosition
+      abis:
+        - name: PositionRouter
+          file: ./abis/PositionRouter.json
+      eventHandlers:
+        - event: CreateDecreasePosition(indexed
+            address,address[],address,uint256,uint256,bool,address,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCreateDecreasePosition
+        - event: CreateIncreasePosition(indexed
+            address,address[],address,uint256,uint256,uint256,bool,uint256,uint256,uint256,uint256,uint256,uint256,uint256)
+          handler: handleCreateIncreasePosition
+        - event: ExecuteDecreasePosition(indexed
+            address,address[],address,uint256,uint256,bool,address,uint256,uint256,uint256,uint256,uint256)
+          handler: handleExecuteDecreasePosition
+        - event: ExecuteIncreasePosition(indexed
+            address,address[],address,uint256,uint256,uint256,bool,uint256,uint256,uint256,uint256)
+          handler: handleExecuteIncreasePosition
+      file: ./src/positionRouter.ts
   - kind: ethereum
     name: Vault
     network: arbitrum-one
@@ -70,88 +70,88 @@ dataSources:
           handler: handleIncreasePosition
         - event: LiquidatePosition(bytes32,address,address,address,bool,uint256,uint256,uint256,int256,uint256)
           handler: handleLiquidatePosition
-        # - event: Swap(address,address,address,uint256,uint256,uint256,uint256)
-        #   handler: handleSwap
+        - event: Swap(address,address,address,uint256,uint256,uint256,uint256)
+          handler: handleSwap
         - event: UpdatePosition(bytes32,uint256,uint256,uint256,uint256,uint256,int256)
           handler: handleUpdatePosition
       file: ./src/vault.ts
-  # - kind: ethereum
-  #   name: OrderBookContract
-  #   network: arbitrum-one
-  #   source:
-  #     address: "0x09f77E8A13De9a35a7231028187e9fD5DB8a2ACB"
-  #     abi: OrderBookContract
-  #     startBlock: 2329450 
-  #   mapping:
-  #     kind: ethereum/events
-  #     apiVersion: 0.0.7
-  #     language: wasm/assemblyscript
-  #     entities:
-  #       - CancelDecreaseOrder
-  #       - CancelIncreaseOrder
-  #       - CancelSwapOrder
-  #       - CreateDecreaseOrder
-  #       - CreateIncreaseOrder
-  #       - CreateSwapOrder
-  #       - ExecuteDecreaseOrder
-  #       - ExecuteIncreaseOrder
-  #       - ExecuteSwapOrder
-  #       - Initialize
-  #       - UpdateDecreaseOrder
-  #       - UpdateGov
-  #       - UpdateIncreaseOrder
-  #       - UpdateMinExecutionFee
-  #       - UpdateMinPurchaseTokenAmountUsd
-  #       - UpdateSwapOrder
-  #     abis:
-  #       - name: OrderBookContract
-  #         file: ./abis/OrderBookContract.json
-  #     eventHandlers:
-  #       - event: CancelDecreaseOrder(indexed
-  #           address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256)
-  #         handler: handleCancelDecreaseOrder
-  #       - event: CancelIncreaseOrder(indexed
-  #           address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256)
-  #         handler: handleCancelIncreaseOrder
-  #       - event: CancelSwapOrder(indexed
-  #           address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
-  #         handler: handleCancelSwapOrder
-  #       - event: CreateDecreaseOrder(indexed
-  #           address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256)
-  #         handler: handleCreateDecreaseOrder
-  #       - event: CreateIncreaseOrder(indexed
-  #           address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256)
-  #         handler: handleCreateIncreaseOrder
-  #       - event: CreateSwapOrder(indexed
-  #           address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
-  #         handler: handleCreateSwapOrder
-  #       - event: ExecuteDecreaseOrder(indexed
-  #           address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256,uint256)
-  #         handler: handleExecuteDecreaseOrder
-  #       - event: ExecuteIncreaseOrder(indexed
-  #           address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256,uint256)
-  #         handler: handleExecuteIncreaseOrder
-  #       - event: ExecuteSwapOrder(indexed
-  #           address,uint256,address[],uint256,uint256,uint256,uint256,bool,bool,uint256)
-  #         handler: handleExecuteSwapOrder
-  #       - event: Initialize(address,address,address,address,uint256,uint256)
-  #         handler: handleInitialize
-  #       - event: UpdateDecreaseOrder(indexed
-  #           address,uint256,address,uint256,address,uint256,bool,uint256,bool)
-  #         handler: handleUpdateDecreaseOrder
-  #       - event: UpdateGov(address)
-  #         handler: handleUpdateGov
-  #       - event: UpdateIncreaseOrder(indexed
-  #           address,uint256,address,address,bool,uint256,uint256,bool)
-  #         handler: handleUpdateIncreaseOrder
-  #       - event: UpdateMinExecutionFee(uint256)
-  #         handler: handleUpdateMinExecutionFee
-  #       - event: UpdateMinPurchaseTokenAmountUsd(uint256)
-  #         handler: handleUpdateMinPurchaseTokenAmountUsd
-  #       - event: UpdateSwapOrder(indexed
-  #           address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
-  #         handler: handleUpdateSwapOrder
-  #     file: ./src/orderBook.ts
+  - kind: ethereum
+    name: OrderBookContract
+    network: arbitrum-one
+    source:
+      address: "0x09f77E8A13De9a35a7231028187e9fD5DB8a2ACB"
+      abi: OrderBookContract
+      startBlock: 2329450 
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      language: wasm/assemblyscript
+      entities:
+        - CancelDecreaseOrder
+        - CancelIncreaseOrder
+        - CancelSwapOrder
+        - CreateDecreaseOrder
+        - CreateIncreaseOrder
+        - CreateSwapOrder
+        - ExecuteDecreaseOrder
+        - ExecuteIncreaseOrder
+        - ExecuteSwapOrder
+        - Initialize
+        - UpdateDecreaseOrder
+        - UpdateGov
+        - UpdateIncreaseOrder
+        - UpdateMinExecutionFee
+        - UpdateMinPurchaseTokenAmountUsd
+        - UpdateSwapOrder
+      abis:
+        - name: OrderBookContract
+          file: ./abis/OrderBookContract.json
+      eventHandlers:
+        - event: CancelDecreaseOrder(indexed
+            address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256)
+          handler: handleCancelDecreaseOrder
+        - event: CancelIncreaseOrder(indexed
+            address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256)
+          handler: handleCancelIncreaseOrder
+        - event: CancelSwapOrder(indexed
+            address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
+          handler: handleCancelSwapOrder
+        - event: CreateDecreaseOrder(indexed
+            address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256)
+          handler: handleCreateDecreaseOrder
+        - event: CreateIncreaseOrder(indexed
+            address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256)
+          handler: handleCreateIncreaseOrder
+        - event: CreateSwapOrder(indexed
+            address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
+          handler: handleCreateSwapOrder
+        - event: ExecuteDecreaseOrder(indexed
+            address,uint256,address,uint256,address,uint256,bool,uint256,bool,uint256,uint256)
+          handler: handleExecuteDecreaseOrder
+        - event: ExecuteIncreaseOrder(indexed
+            address,uint256,address,uint256,address,address,uint256,bool,uint256,bool,uint256,uint256)
+          handler: handleExecuteIncreaseOrder
+        - event: ExecuteSwapOrder(indexed
+            address,uint256,address[],uint256,uint256,uint256,uint256,bool,bool,uint256)
+          handler: handleExecuteSwapOrder
+        - event: Initialize(address,address,address,address,uint256,uint256)
+          handler: handleInitialize
+        - event: UpdateDecreaseOrder(indexed
+            address,uint256,address,uint256,address,uint256,bool,uint256,bool)
+          handler: handleUpdateDecreaseOrder
+        - event: UpdateGov(address)
+          handler: handleUpdateGov
+        - event: UpdateIncreaseOrder(indexed
+            address,uint256,address,address,bool,uint256,uint256,bool)
+          handler: handleUpdateIncreaseOrder
+        - event: UpdateMinExecutionFee(uint256)
+          handler: handleUpdateMinExecutionFee
+        - event: UpdateMinPurchaseTokenAmountUsd(uint256)
+          handler: handleUpdateMinPurchaseTokenAmountUsd
+        - event: UpdateSwapOrder(indexed
+            address,uint256,address[],uint256,uint256,uint256,bool,bool,uint256)
+          handler: handleUpdateSwapOrder
+      file: ./src/orderBook.ts
   # - kind: ethereum
   #   name: EventEmitter
   #   network: arbitrum-one
