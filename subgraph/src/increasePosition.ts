@@ -61,6 +61,8 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     if(eventType == 'Open'){
         positionSlotV2.idCount=positionSlotV2.idCount.plus(BigInt.fromString("1"))
         positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),positionKey)
+        positionSlotV2.blockTimestamp=event.block.timestamp
+        positionSlotV2.blockNumber=event.block.number
     }
     const sizeInToken=returnValueOrZero(data.getUintItem("sizeInTokens"))
     const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
