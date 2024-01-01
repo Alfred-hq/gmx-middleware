@@ -1221,6 +1221,23 @@ type oraclePrice @entity(immutable:true){
   token:Token!
 }
 
+
+type PriceCandle @entity {
+  id: ID!
+  token:Token!
+  tokenAddress:String!
+  openMin: BigInt!
+  highMin: BigInt!
+  lowMin: BigInt!
+  closeMin: BigInt!
+  openMax: BigInt!
+  highMax: BigInt!
+  lowMax: BigInt!
+  closeMax: BigInt!
+  timestamp: Int! # start of period
+  period: String!
+}
+
 type Token @entity(immutable:true){
   id:String!
   token:String!
