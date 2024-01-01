@@ -83,11 +83,13 @@ const sizeDeltaInUsd=returnValueOrZero(data.getUintItem("sizeDeltaUsd"))
 const sizeDeltaInToken=returnValueOrZero(data.getUintItem("sizeDeltaInTokens"))
 const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
 const orderKey=data.getBytes32Item("orderKey")
-const collateralDeltaUsd=returnValueOrZero(data.getIntItem("collateralDeltaAmount")).times(collateralTokenPriceMin)
+const collateralDeltaUsd=returnValueOrZero(data.getUintItem("collateralDeltaAmount")).times(collateralTokenPriceMin)
 const orderType=returnValueOrZero(data.getUintItem("orderType"))
 const collateralInUsd=returnValueOrZero(data.getUintItem("collateralAmount")).times(collateralTokenPriceMin)
 const sizeInToken=returnValueOrZero(data.getUintItem("sizeInTokens"))
 const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
+const priceImpactUsd=returnValueOrZero(data.getIntItem("priceImpactUsd"))
+
 let averagePrice= sizeInUsd.notEqual(ZERO_BI) && sizeInToken.notEqual(ZERO_BI) ? sizeInUsd.div(sizeInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
 if(eventType == 'Close'){
     averagePrice=sizeDeltaInUsd.notEqual(ZERO_BI) && sizeDeltaInToken.notEqual(ZERO_BI) ? sizeDeltaInUsd.div(sizeDeltaInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
@@ -106,10 +108,10 @@ positionSlotV2.lastDecreasedIndexTokenPriceMax = returnValueOrZero(indexTokenPri
 positionSlotV2.lastDecreasedCollateralTokenPriceMax=returnValueOrZero(collateralTokenPriceMax)
 positionSlotV2.lastDecreasedCollateralTokenPriceMin=collateralTokenPriceMin
 positionSlotV2.executionPrice=executionPrice
+positionSlotV2.executionPrice1=executionPrice.plus(priceImpactUsd)
 // pnl data 
 const basePnlUsd=data.getIntItem("basePnlUsd")
 const uncappedPnlUsd=data.getIntItem("uncappedBasePnlUsd")
-const priceImpactUsd=data.getUintItem("priceImpactUsd")
 positionSlotV2.basePnlUsd=positionSlotV2.basePnlUsd.plus( returnValueOrZero(basePnlUsd))
 positionSlotV2.uncappedBasePnlUsd=positionSlotV2.uncappedBasePnlUsd.plus(returnValueOrZero(uncappedPnlUsd))
 positionSlotV2.averagePrice=averagePrice
@@ -133,6 +135,7 @@ decreasePositionData.sizeInToken=returnValueOrZero(sizeInToken)
 decreasePositionData.isLong=positionSlotV2.isLong
 // decreasePositionData.acceptablePrice=
 decreasePositionData.executionPrice=returnValueOrZero(executionPrice)
+decreasePositionData.executionPrice1=returnValueOrZero(executionPrice).plus(priceImpactUsd)
 decreasePositionData.indexTokenPriceMax=returnValueOrZero(indexTokenPriceMax)
 decreasePositionData.indexTokenPriceMin=returnValueOrZero(indexTokenPriceMin)
 decreasePositionData.collateralTokenPriceMin=returnValueOrZero(collateralTokenPriceMin)
@@ -255,10 +258,13 @@ positionSettled.shortTokenGmxDecimal=positionSlotV2.shortTokenGmxDecimal
 positionSettled.collateralTokenDecimal=positionSlotV2.collateralTokenDecimal
 positionSettled.collateralTokenGmxDecimal=positionSlotV2.collateralTokenGmxDecimal
 positionSettled.settledPrice=positionSlotV2.executionPrice
+positionSettled.settledPrice1=positionSlotV2.executionPrice
 positionSettled.averagePrice=positionSlotV2.averagePrice
 positionSettled.is_liquidated=false
 positionSettled.transactionHash=event.transaction.hash.toHexString()
 positionSettled.logIndex=event.logIndex
+positionSettled.openBlockNumber=positionSlotV2.blockNumber
+positionSettled.openBlockTimestamp=positionSlotV2.blockTimestamp
 if(orderType.equals(BigInt.fromString("7"))){
     positionSettled.is_liquidated=true
 }  
@@ -319,6 +325,8 @@ export function updateDecreaseTradeData(entity : DecreasePositionV2 ,event: Even
     trade.collateralTokenDecimal=entity.collateralTokenDecimal
     trade.collateralTokenGmxDecimal=entity.collateralTokenGmxDecimal
     trade.averagePrice=entity.averagePrice
+    trade.executionPrice1=entity.executionPrice1
+
     trade.save()
     return
     }

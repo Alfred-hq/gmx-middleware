@@ -718,6 +718,8 @@ type IncreasePositionV2 @entity(immutable: true) {
   isLong: Boolean! # bool
   # acceptablePrice: BigInt! # uint256
   executionPrice: BigInt! # uint256 //new
+  executionPrice1:BigInt # uint256 // execution price +- price Impact
+
   indexTokenPriceMax: BigInt! #new
   indexTokenPriceMin: BigInt! #new
   collateralTokenPriceMin: BigInt! #new
@@ -739,6 +741,7 @@ type IncreasePositionV2 @entity(immutable: true) {
   totalFeeAmount:BigInt!
   feesUpdatedAt: BigInt!
   priceImpactUsd: BigInt
+  priceImpactAmount: BigInt
   basePnlUsd: BigInt
   uncappedBasePnlUsd:BigInt
 
@@ -774,6 +777,7 @@ type DecreasePositionV2 @entity(immutable: true) {
   sizeInToken:BigInt!
   isLong: Boolean! # bool
   executionPrice: BigInt # uint256 //new
+  executionPrice1:BigInt # uint256 // execution price +- price Impact
   indexTokenPriceMax: BigInt #new
   indexTokenPriceMin: BigInt #new
   collateralTokenPriceMin: BigInt #new
@@ -832,6 +836,7 @@ type TradesV2 @entity(immutable: true) {
   isLong: Boolean! # bool
   acceptablePrice: BigInt # uint256
   executionPrice: BigInt # uint256 //new
+  executionPrice1:BigInt # uint256 // execution price +- price Impact
   indexTokenPriceMax: BigInt #new
   indexTokenPriceMin: BigInt #new
   collateralTokenPriceMin: BigInt #new
@@ -841,6 +846,7 @@ type TradesV2 @entity(immutable: true) {
 
 
   priceImpactUsd: BigInt
+  priceImpactAmount: BigInt
   basePnlUsd: BigInt
   uncappedBasePnlUsd:BigInt
 
@@ -926,6 +932,7 @@ type PositionSlotV2 @entity {
   lastDecreasedCollateralTokenPriceMax: BigInt
   averagePrice:BigInt
   executionPrice:BigInt
+  executionPrice1:BigInt # uint256 // execution price +- price Impact
 
   #v2 specific Data
   priceImpactUsd: BigInt!
@@ -990,6 +997,8 @@ type PositionSettledV2 @entity(immutable: true) {
 
   maxSize: BigInt!
   maxCollateral: BigInt!
+  openBlockNumber: BigInt
+  openBlockTimestamp: BigInt
   blockNumber: BigInt!
   blockTimestamp: BigInt!
   lastIncreasedTimestamp: BigInt!
@@ -1006,6 +1015,7 @@ type PositionSettledV2 @entity(immutable: true) {
   lastDecreasedCollateralTokenPriceMax: BigInt
   averagePrice:BigInt
   settledPrice:BigInt
+  settledPrice1:BigInt
   is_liquidated:Boolean
 
 
