@@ -58,12 +58,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     const positionKey=keyBytes32.toHexString()
     // init slot
     let positionSlotV2=createOrLoadPositionSlot(positionKey,data)
-    if(eventType == 'Open'){
-        positionSlotV2.idCount=positionSlotV2.idCount.plus(BigInt.fromString("1"))
-        positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),positionKey)
-        positionSlotV2.blockTimestamp=event.block.timestamp
-        positionSlotV2.blockNumber=event.block.number
-    }
+    
     const sizeInToken=returnValueOrZero(data.getUintItem("sizeInTokens"))
     const sizeInUsd=returnValueOrZero(data.getUintItem("sizeInUsd"))
     const indexTokenPriceMax=returnValueOrZero(data.getUintItem("indexTokenPrice.max"))
@@ -78,7 +73,18 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     const orderKey=data.getBytes32Item("orderKey")
     const executionPrice=returnValueOrZero(data.getUintItem("executionPrice"))
     const averagePrice= sizeInUsd.notEqual(ZERO_BI) && sizeInToken.notEqual(ZERO_BI) ? sizeInUsd.div(sizeInToken).times(BigInt.fromString("10").pow(positionSlotV2.indexTokenDecimal.toU32() as u8)):ZERO_BI
-      
+    const priceImpactUsd= returnValueOrZero(data.getIntItem("priceImpactUsd"))
+    const priceImpactAmount= returnValueOrZero(data.getIntItem("priceImpactAmount"))
+    if(eventType == 'Open'){
+        positionSlotV2.idCount=positionSlotV2.idCount.plus(BigInt.fromString("1"))
+        positionSlotV2.linkId=getPositionLinkId(positionSlotV2.idCount.toI32(),positionKey)
+        positionSlotV2.blockTimestamp=event.block.timestamp
+        positionSlotV2.blockNumber=event.block.number
+        positionSlotV2.indexTokenOpenPriceMin = indexTokenPriceMin
+        positionSlotV2.indexTokenPriceMax = indexTokenPriceMax
+        positionSlotV2.collateralTokenPriceMax = collateralTokenPriceMax
+        positionSlotV2.collateralTokenPriceMin = collateralTokenPriceMin
+    }
     positionSlotV2.collateralInUsd=collateralInUsd
     positionSlotV2.sizeInToken=sizeInToken
     positionSlotV2.sizeInUsd=sizeInUsd
@@ -105,6 +111,8 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     positionSlotV2.feesUpdatedAt=event.block.timestamp
     }  
     positionSlotV2.averagePrice=averagePrice
+    positionSlotV2.executionPrice=executionPrice
+    positionSlotV2.executionPrice1=executionPrice.plus(priceImpactUsd)
     positionSlotV2.save()
   let increasePositionData= IncreasePositionV2.load(`${event.transaction.hash.toHexString()}_${event.logIndex.toString()}`)
 
@@ -126,6 +134,7 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     increasePositionData.sizeInToken=sizeInToken
     increasePositionData.isLong=positionSlotV2.isLong
     increasePositionData.executionPrice=executionPrice
+    increasePositionData.executionPrice1=executionPrice.plus(priceImpactUsd)
     increasePositionData.indexTokenPriceMax=indexTokenPriceMax
     increasePositionData.indexTokenPriceMin=indexTokenPriceMin
     increasePositionData.collateralTokenPriceMin=collateralTokenPriceMin
@@ -138,6 +147,8 @@ export function handleIncreasePosition(event: EventLog1,data: EventData,eventTyp
     increasePositionData.collateralDeltaUsd=collateralDeltaUsd
     increasePositionData.eventType=eventType.toString()
     increasePositionData.linkId=positionSlotV2.linkId
+    increasePositionData.priceImpactUsd=priceImpactUsd
+    increasePositionData.priceImpactAmount=priceImpactAmount
     if(feeData){
         increasePositionData.fundingFeeAmount=feeData.fundingFeeAmount
         increasePositionData.positionFeeAmount=feeData.positionFeeAmount
@@ -236,6 +247,7 @@ export function updateDecreaseTradeData(entity : IncreasePositionV2 ,event: Even
     trade.isLong=entity.isLong
     // trade.acceptablePrice=entity.acceptablePrice
     trade.executionPrice=entity.executionPrice
+    trade.executionPrice1=entity.executionPrice1
     trade.indexTokenPriceMax=entity.indexTokenPriceMax
     trade.indexTokenPriceMin=entity.indexTokenPriceMin
     trade.collateralTokenPriceMin=entity.collateralTokenPriceMin
