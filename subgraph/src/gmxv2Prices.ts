@@ -114,12 +114,12 @@ function getMax(a:BigInt, b:BigInt): BigInt {
         entity.openMax = prevEntity.closeMax
       }
       entity.closeMin= minPrice
+      entity.closeMax= maxPrice
       entity.highMin  = getMax(entity.openMin, entity.closeMin)
       entity.lowMin   = getMin(entity.openMin, entity.closeMin)
       entity.highMax  = getMax(entity.openMax, entity.closeMax)
       entity.lowMax   = getMin(entity.openMax, entity.closeMax)
       entity.timestamp = periodStart.toI32()
-      entity.token = tokenAddress
     } else {
       entity.highMin = getMax(entity.highMin,minPrice);
       entity.lowMin = getMin(entity.lowMin, minPrice)
