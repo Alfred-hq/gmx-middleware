@@ -23,7 +23,12 @@ import {
 import { EventLog1 } from "../generated/EventEmitter/EventEmitter";
 import { handleOraclePriceUpdateEvent } from "./gmxv2Prices";
 import { returnAddressOrZeroAddress } from "./common";
-import { handleOrderCreatedEventV2, handleOrderCancelledEventV2, handleOrderUpdatedEventV2 } from "./ordersV2";
+import {
+  handleOrderCreatedEventV2,
+  handleOrderCancelledEventV2,
+  handleOrderUpdatedEventV2,
+  handleOrderExecutedEventV2
+} from "./ordersV2";
 // export function handleEventLog(event: EventLogEvent): void {
 //   log.info("event log",[])
 //   return
@@ -40,6 +45,7 @@ export function handleEventLog1(event: EventLog1Event): void {
   const isOrderCreatedEvent = eventName == "OrderCreated";
   const isOrderUpdatedEvent = eventName == "OrderUpdated";
   const isOrderCancelledEvent = eventName == "OrderCancelled";
+  const isOrderExecutedEvent = eventName == "OrderExecuted";
 
   const data = new EventData(event.params.eventData);
   if (
@@ -85,6 +91,10 @@ export function handleEventLog1(event: EventLog1Event): void {
   if (isOrderCancelledEvent) {
     log.debug("order cancelled event ", []);
     handleOrderCancelledEventV2(event, data);
+  }
+  if (isOrderExecutedEvent) {
+    log.debug("order cancelled event ", []);
+    handleOrderExecutedEventV2(event, data);
   }
   return;
 }

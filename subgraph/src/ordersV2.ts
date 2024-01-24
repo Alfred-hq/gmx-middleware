@@ -60,6 +60,7 @@ export function handleOrderCreatedEventV2(
   Order.transactionHash = event.transaction.hash.toHexString();
   Order.logIndex = event.logIndex;
   Order.isCancelled = false;
+  Order.isExecuted = false;
   Order.save();
   return;
 }
@@ -74,22 +75,23 @@ export function handleOrderUpdatedEventV2(
   }
   const key = keyBytes32.toHexString();
   let Order = OrderV2.load(key);
-  Order.blockNumber = event.block.number;
-  Order.blockTimestamp = event.block.timestamp;
-  Order.transactionHash = event.transaction.hash.toHexString();
-  Order.logIndex = event.logIndex;
-  Order.account = returnAddressOrZeroAddress(
-    data.getAddressItemString("account")
-  );
-  Order.sizeDeltaUsd = returnValueOrZero(data.getUintItem("sizeDeltaUsd"));
-  Order.triggerPrice = returnValueOrZero(data.getUintItem("triggerPrice"));
-  Order.acceptablePrice = returnValueOrZero(
-    data.getUintItem("acceptablePrice")
-  );
-  Order.minOutputAmount = returnValueOrZero(
-    data.getUintItem("minOutputAmount")
-  );
-  Order.save();
+  if (Order) {
+    Order.sizeDeltaUsd = returnValueOrZero(data.getUintItem("sizeDeltaUsd"));
+    Order.triggerPrice = returnValueOrZero(data.getUintItem("triggerPrice"));
+    Order.acceptablePrice = returnValueOrZero(
+      data.getUintItem("acceptablePrice")
+    );
+    Order.minOutputAmount = returnValueOrZero(
+      data.getUintItem("minOutputAmount")
+    );
+
+    Order.blockNumber = event.block.number;
+    Order.blockTimestamp = event.block.timestamp;
+    Order.transactionHash = event.transaction.hash.toHexString();
+    Order.logIndex = event.logIndex;
+    
+    Order.save();
+  }
 
   return;
 }
@@ -104,16 +106,42 @@ export function handleOrderCancelledEventV2(
   }
   const key = keyBytes32.toHexString();
   let Order = OrderV2.load(key);
-  Order.blockNumber = event.block.number;
-  Order.blockTimestamp = event.block.timestamp;
-  Order.transactionHash = event.transaction.hash.toHexString();
-  Order.logIndex = event.logIndex;
-  Order.account = returnAddressOrZeroAddress(
-    data.getAddressItemString("account")
-  );
-  Order.isCancelled = true;
-  Order.reason = data.getStringItem("reason");
-  Order.reasonBytes = data.getBytesItem("reasonBytes");
-  Order.save();
+  if(Order) {
+    Order.isCancelled = true;
+    Order.reason = data.getStringItem("reason");
+    Order.reasonBytes = data.getBytesItem("reasonBytes");
+
+    Order.blockNumber = event.block.number;
+    Order.blockTimestamp = event.block.timestamp;
+    Order.transactionHash = event.transaction.hash.toHexString();
+    Order.logIndex = event.logIndex;
+
+    Order.save();
+  }
   return;
 }
+
+export function handleOrderExecutedEventV2(
+  event: EventLog1,
+  data: EventData
+): void {
+  const keyBytes32 = data.getBytes32Item("key");
+  if (!keyBytes32) {
+    return;
+  }
+  const key = keyBytes32.toHexString();
+  let Order = OrderV2.load(key);
+  if(Order) {
+    Order.secondaryOrderType = returnValueOrZero(data.getUintItem("secondaryOrderType"));
+    Order.isExecuted = true;
+
+    Order.blockNumber = event.block.number;
+    Order.blockTimestamp = event.block.timestamp;
+    Order.transactionHash = event.transaction.hash.toHexString();
+    Order.logIndex = event.logIndex;
+
+    Order.save();
+  }
+  return;
+}
+

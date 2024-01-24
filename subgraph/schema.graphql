@@ -1286,9 +1286,10 @@ type OrderV2 @entity(immutable: true) {
   shouldUnwrapNativeToken: Boolean! # Boolean
   isFrozen: Boolean! # Boolean
   isCancelled: Boolean! # Boolean
+  isExecuted: Boolean! # Boolean
   reason: String # String 
   reasonBytes: Bytes # Bytes
-
+  secondaryOrderType: BigInt # uint256
   blockTimestamp: BigInt! # uint256
   blockNumber: BigInt!
   transactionHash: String!
