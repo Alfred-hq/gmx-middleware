@@ -1,12 +1,12 @@
-import { EventLog1 } from "../generated/EventEmitter/EventEmitter";
+import { EventLog2 } from "../generated/EventEmitter/EventEmitter";
 import { OrderV2 } from "../generated/schema";
-import { EventData } from "./EventEmitter";
+import { EventData2 } from "./EventEmitter2";
 import { returnAddressOrZeroAddress } from "./common";
 import { returnValueOrZero } from "./increasePosition";
 
 export function handleOrderCreatedEventV2(
-  event: EventLog1,
-  data: EventData
+  event: EventLog2,
+  data: EventData2
 ): void {
   const keyBytes32 = data.getBytes32Item("key");
   if (!keyBytes32) {
@@ -66,8 +66,8 @@ export function handleOrderCreatedEventV2(
 }
 
 export function handleOrderUpdatedEventV2(
-  event: EventLog1,
-  data: EventData
+  event: EventLog2,
+  data: EventData2
 ): void {
   const keyBytes32 = data.getBytes32Item("key");
   if (!keyBytes32) {
@@ -97,8 +97,8 @@ export function handleOrderUpdatedEventV2(
 }
 
 export function handleOrderCancelledEventV2(
-  event: EventLog1,
-  data: EventData
+  event: EventLog2,
+  data: EventData2
 ): void {
   const keyBytes32 = data.getBytes32Item("key");
   if (!keyBytes32) {
@@ -122,8 +122,8 @@ export function handleOrderCancelledEventV2(
 }
 
 export function handleOrderExecutedEventV2(
-  event: EventLog1,
-  data: EventData
+  event: EventLog2,
+  data: EventData2
 ): void {
   const keyBytes32 = data.getBytes32Item("key");
   if (!keyBytes32) {

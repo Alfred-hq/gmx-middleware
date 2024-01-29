@@ -8,6 +8,7 @@ import {
 } from "../generated/EventEmitter/EventEmitter";
 import { handleDecreasePositionEventV2 } from "./decreasePosition";
 import { EventData } from "./EventEmitter";
+import { EventData2 } from "./EventEmitter2";
 import { handleIncreasePositionEventV2 } from "./increasePosition";
 import { log } from "@graphprotocol/graph-ts";
 import { handleFeeEventV2 } from "./gmxV2Fee";
@@ -42,21 +43,13 @@ export function handleEventLog1(event: EventLog1Event): void {
   const isDecEvent = eventName == "PositionDecrease";
   const isPriceEvent = eventName == "OraclePriceUpdate";
   const isMarketCreatedEvent = eventName == "MarketCreated";
-  const isOrderCreatedEvent = eventName == "OrderCreated";
-  const isOrderUpdatedEvent = eventName == "OrderUpdated";
-  const isOrderCancelledEvent = eventName == "OrderCancelled";
-  const isOrderExecutedEvent = eventName == "OrderExecuted";
-
   const data = new EventData(event.params.eventData);
   if (
     !isFeeEvent &&
     !isIncEvent &&
     !isDecEvent &&
     !isPriceEvent &&
-    !isMarketCreatedEvent &&
-    !isOrderCreatedEvent &&
-    !isOrderUpdatedEvent &&
-    !isOrderCancelledEvent
+    !isMarketCreatedEvent
   ) {
     return;
   }
@@ -79,22 +72,6 @@ export function handleEventLog1(event: EventLog1Event): void {
   if (isMarketCreatedEvent) {
     log.debug("market event", []);
     handleMarketCreatedEvent(event, data);
-  }
-  if (isOrderCreatedEvent) {
-    log.debug("order created event ", []);
-    handleOrderCreatedEventV2(event, data);
-  }
-  if (isOrderUpdatedEvent) {
-    log.debug("order updated event ", []);
-    handleOrderUpdatedEventV2(event, data);
-  }
-  if (isOrderCancelledEvent) {
-    log.debug("order cancelled event ", []);
-    handleOrderCancelledEventV2(event, data);
-  }
-  if (isOrderExecutedEvent) {
-    log.debug("order cancelled event ", []);
-    handleOrderExecutedEventV2(event, data);
   }
   return;
 }
@@ -128,7 +105,38 @@ export function handleMarketCreatedEvent(
   market.save();
 }
 
-// export function handleEventLog2(event: EventLog2Event): void {
-//   log.info("event log 2",[])
-//   return
-// }
+export function handleEventLog2(event: EventLog2Event): void {
+  log.info("event log 2",[])
+  const eventName = event.params.eventName;
+  const isOrderCreatedEvent = eventName == "OrderCreated";
+  const isOrderUpdatedEvent = eventName == "OrderUpdated";
+  const isOrderCancelledEvent = eventName == "OrderCancelled";
+  const isOrderExecutedEvent = eventName == "OrderExecuted";
+  if (
+    !isOrderCreatedEvent &&
+    !isOrderUpdatedEvent &&
+    !isOrderCancelledEvent &&
+    !isOrderExecutedEvent
+  ) {
+    return;
+  }
+
+  const data = new EventData2(event.params.eventData);
+  if (isOrderCreatedEvent) {
+    log.debug("order created event ", []);
+    handleOrderCreatedEventV2(event, data);
+  }
+  if (isOrderUpdatedEvent) {
+    log.debug("order updated event ", []);
+    handleOrderUpdatedEventV2(event, data);
+  }
+  if (isOrderCancelledEvent) {
+    log.debug("order cancelled event ", []);
+    handleOrderCancelledEventV2(event, data);
+  }
+  if (isOrderExecutedEvent) {
+    log.debug("order cancelled event ", []);
+    handleOrderExecutedEventV2(event, data);
+  }
+  return
+}
