@@ -1262,7 +1262,7 @@ type Market @entity(immutable:true){
   shortToken:String!
 }
 
-type OrderV2 @entity(immutable: true) {
+type OrderV2 @entity {
   id: String!
   key: String! # Order key
   account: String! # Address
