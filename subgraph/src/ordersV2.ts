@@ -1,5 +1,5 @@
 import { EventLog2 } from "../generated/EventEmitter/EventEmitter";
-import { OrderV2 } from "../generated/schema";
+import { Market, OrderV2 } from "../generated/schema";
 import { EventData2 } from "./EventEmitter2";
 import { returnAddressOrZeroAddress } from "./common";
 import { returnValueOrZero } from "./increasePosition";
@@ -24,9 +24,16 @@ export function handleOrderCreatedEventV2(
   Order.uiFeeReceiver = returnAddressOrZeroAddress(
     data.getAddressItemString("uiFeeReceiver")
   );
-  Order.market = returnAddressOrZeroAddress(
+  const marketToken = returnAddressOrZeroAddress(
     data.getAddressItemString("market")
   );
+  Order.market = marketToken
+  const market = Market.load(marketToken)
+  if(market) {
+    Order.indexToken = returnAddressOrZeroAddress(market.indexToken)
+    Order.shortToken = returnAddressOrZeroAddress(market.shortToken)
+    Order.longToken = returnAddressOrZeroAddress(market.longToken)
+  }
   Order.initialCollateralToken = returnAddressOrZeroAddress(
     data.getAddressItemString("initialCollateralToken")
   );

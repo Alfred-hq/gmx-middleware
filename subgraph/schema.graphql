@@ -1270,6 +1270,9 @@ type OrderV2 @entity {
   # callbackContract: String! # Address
   uiFeeReceiver: String! # Address
   market: String! # Address
+  indexToken: String # Address
+  shortToken: String # Address
+  longToken: String # Address
   initialCollateralToken: String! # Address
   # swapPath: [String!] # Array of addresses (new field)
   orderType: BigInt! # uint256
