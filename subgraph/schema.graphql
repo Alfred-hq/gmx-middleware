@@ -1261,3 +1261,40 @@ type Market @entity(immutable:true){
   longToken:String!
   shortToken:String!
 }
+
+type OrderV2 @entity {
+  id: String!
+  key: String! # Order key
+  account: String! # Address
+  receiver: String! # Address
+  # callbackContract: String! # Address
+  uiFeeReceiver: String! # Address
+  market: String! # Address
+  indexToken: String # Address
+  shortToken: String # Address
+  longToken: String # Address
+  initialCollateralToken: String! # Address
+  # swapPath: [String!] # Array of addresses (new field)
+  orderType: BigInt! # uint256
+  decreasePositionSwapType: BigInt! # uint256
+  sizeDeltaUsd: BigInt! # uint256
+  initialCollateralDeltaAmount: BigInt! # uint256
+  triggerPrice: BigInt! # uint256
+  acceptablePrice: BigInt! # uint256
+  executionFee: BigInt! # uint256
+  callbackGasLimit: BigInt! # uint256
+  minOutputAmount: BigInt! # uint256
+  updatedAtBlock: BigInt! # uint256
+  isLong: Boolean! # Boolean
+  shouldUnwrapNativeToken: Boolean! # Boolean
+  isFrozen: Boolean! # Boolean
+  isCancelled: Boolean! # Boolean
+  isExecuted: Boolean! # Boolean
+  reason: String # String 
+  reasonBytes: Bytes # Bytes
+  secondaryOrderType: BigInt # uint256
+  blockTimestamp: BigInt! # uint256
+  blockNumber: BigInt!
+  transactionHash: String!
+  logIndex: BigInt!
+}
